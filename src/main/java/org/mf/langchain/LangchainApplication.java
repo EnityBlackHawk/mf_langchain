@@ -1,13 +1,24 @@
 package org.mf.langchain;
 
+import dev.langchain4j.model.chat.ChatLanguageModel;
+import dev.langchain4j.model.huggingface.HuggingFaceChatModel;
+import dev.langchain4j.model.localai.LocalAiChatModel;
+import dev.langchain4j.model.openai.OpenAiChatModel;
+import dev.langchain4j.model.openai.OpenAiChatModelName;
+import dev.langchain4j.model.openai.OpenAiLanguageModel;
+import dev.langchain4j.model.openai.OpenAiLanguageModelName;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.Scanner;
 
 @SpringBootApplication
 public class LangchainApplication {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         SpringApplication.run(LangchainApplication.class, args);
     }
-
 }

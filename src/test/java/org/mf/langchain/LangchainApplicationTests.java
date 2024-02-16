@@ -8,6 +8,7 @@ class LangchainApplicationTests {
 
     @Test
     void contextLoads() {
+
     }
 
 }
