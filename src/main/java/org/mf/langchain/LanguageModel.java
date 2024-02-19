@@ -1,9 +1,10 @@
 package org.mf.langchain;
 
 import dev.langchain4j.model.chat.ChatLanguageModel;
-import lombok.Getter;
+import org.springframework.context.annotation.Bean;
+import org.springframework.stereotype.Component;
 
-@Getter
+
 public record LanguageModel(ChatLanguageModel chatLanguageModel) {
 
     public String RunBlocking(String prompt) {
@@ -11,11 +12,8 @@ public record LanguageModel(ChatLanguageModel chatLanguageModel) {
     }
 
     public TemplatedThread<String> RunAsync(String prompt) {
-        var t = new TemplatedThread<String>(() -> {
-            return chatLanguageModel.generate(prompt);
-        });
+        var t = new TemplatedThread<>(() -> chatLanguageModel.generate(prompt));
         t.runAsync();
         return t;
     }
-
 }

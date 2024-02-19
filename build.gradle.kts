@@ -18,12 +18,12 @@ repositories {
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.projectlombok:lombok")
+    implementation("org.springframework.boot:spring-boot-starter-websocket")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
-    implementation("dev.langchain4j:langchain4j:0.23.0")
+    implementation("dev.langchain4j:langchain4j:0.27.1")
     implementation("dev.langchain4j:langchain4j-open-ai:0.27.1")
     implementation("dev.langchain4j:langchain4j-local-ai:0.27.1")
     implementation("dev.langchain4j:langchain4j-hugging-face:0.27.1")
-
 
 }
 
