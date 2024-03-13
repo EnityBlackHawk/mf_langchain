@@ -11,10 +11,12 @@ import dev.langchain4j.model.openai.OpenAiChatModel;
 import dev.langchain4j.model.openai.OpenAiChatModelName;
 import dev.langchain4j.model.openai.OpenAiLanguageModel;
 import dev.langchain4j.model.openai.OpenAiLanguageModelName;
+import dev.langchain4j.model.vertexai.VertexAiGeminiChatModel;
 import dev.langchain4j.service.AiServices;
 import org.mf.langchain.service.LangChainService;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import dev.langchain4j.model.vertexai.VertexAiGeminiStreamingChatModel;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -34,10 +36,18 @@ public class LangchainApplication {
 //                .timeout(Duration.ofDays(1))
 //                .temperature(0.8)
 //                .build();
-//        Assistant assistant = AiServices.create(Assistant.class, model);
-//
-//        var ts = assistant.chat("What is Lua Script ?");
-//        ts.onNext(System.out::print).onError(Throwable::printStackTrace).start();
+        // AIzaSyBiyiDDkyHuu3d98AZmHX9nTxmheKKBfWk
+
+        StreamingChatLanguageModel model = VertexAiGeminiStreamingChatModel.builder()
+                .modelName("gemini-pro")
+                .project("gen-lang-client-0095677353")
+                .location("pt-BR")
+                .build();
+
+        Assistant assistant = AiServices.create(Assistant.class, model);
+
+        var ts = assistant.chat("Considering a relational bank:\\n Clients(id, name)\\n Invoice(id, revenue, client_id) client_id references Clients\\n Generate a Java class to generate MongoDB documents following the following specifications:\\nClients -> Invoice");
+        ts.onNext(System.out::print).onError(Throwable::printStackTrace).start();
 
     }
 }

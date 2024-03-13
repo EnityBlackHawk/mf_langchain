@@ -9,6 +9,5 @@ import dev.langchain4j.service.V;
 
 
 public interface Assistant {
-    @SystemMessage("Answer in JSON format")
     TokenStream chat(String userMessage);
 }
