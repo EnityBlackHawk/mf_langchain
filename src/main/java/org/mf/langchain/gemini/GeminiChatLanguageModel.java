@@ -5,10 +5,13 @@ import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.output.Response;
+import lombok.Builder;
 
 import java.util.List;
 
-public class GeminiImp implements ChatLanguageModel {
+@Builder
+public class GeminiChatLanguageModel implements ChatLanguageModel {
+
     @Override
     public String generate(String userMessage) {
         return ChatLanguageModel.super.generate(userMessage);
