@@ -1,6 +1,7 @@
 package org.mf.langchain;
 
 import org.mf.langchain.metadata.DbMetadata;
+import org.mf.langchain.service.GeminiService;
 import org.mf.langchain.util.SqlDataType;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -37,7 +38,13 @@ public class LangchainApplication {
 //        ts.onNext(System.out::print).onError(Throwable::printStackTrace).start();
 
         var dbc = new DbMetadata("jdbc:postgresql://localhost:5432/air", "postgres", "admin");
-        System.out.print(dbc.getTables());
-
+        String s = "";
+        for(var x  : dbc.getTables()){
+            s = s.concat(x.toString());
+        }
+        GeminiService gs = context.getBean(GeminiService.class);
+        System.out.print(
+                gs.getCompletion("Generate a SQL that selects all flights departing from Curitiba. Using this database: " + s)
+        );
     }
 }

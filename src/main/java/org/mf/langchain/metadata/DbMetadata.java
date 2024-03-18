@@ -36,20 +36,17 @@ public class DbMetadata {
         while(tbs.next()) {
             ArrayList<Column> columnArrayList = new ArrayList<>();
             String tb_name = tbs.getString("TABLE_NAME");
-            // System.out.print(tb_name + " ");
             ResultSet cls = _metadata.getColumns(null, null, tb_name, null);
             while (cls.next())
             {
                 String columnName = cls.getString("COLUMN_NAME");
                 String datatype = cls.getString("DATA_TYPE");
-                // System.out.print("(" + columnName + " - " + SqlDataType.getByValue(Integer.parseInt(datatype)) + " ) ");
 
                 columnArrayList.add(
                         new Column(columnName, SqlDataType.getByValue(Integer.parseInt(datatype)))
                 );
 
             }
-            System.out.print("\n");
             tables.add(
                     new Table(
                             tb_name,
