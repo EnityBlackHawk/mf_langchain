@@ -1,5 +1,6 @@
 package org.mf.langchain;
 
+import org.mf.langchain.metadata.DbMetadata;
 import org.mf.langchain.util.SqlDataType;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -35,28 +36,8 @@ public class LangchainApplication {
 //        var ts = assistant.chat("Considering a relational bank:\\n Clients(id, name)\\n Invoice(id, revenue, client_id) client_id references Clients\\n Generate a Java class to generate MongoDB documents following the following specifications:\\nClients -> Invoice");
 //        ts.onNext(System.out::print).onError(Throwable::printStackTrace).start();
 
-        var connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/air", "postgres", "admin");
-        if(connection.isClosed())
-            throw new RuntimeException("ERROR MANOOO");
-        var metaData = connection.getMetaData();
-
-        String name = metaData.getDatabaseProductName();
-
-        System.out.println(name);
-        ResultSet tbs = metaData.getTables(null, null, null, new String[] {"TABLE"});
-
-        while(tbs.next()) {
-            String tb_name = tbs.getString("TABLE_NAME");
-            System.out.print(tb_name + " ");
-            ResultSet cls = metaData.getColumns(null, null, tb_name, null);
-            while (cls.next())
-            {
-                String columnName = cls.getString("COLUMN_NAME");
-                String datatype = cls.getString("DATA_TYPE");
-                System.out.print("(" + columnName + " - " + SqlDataType.getByValue(Integer.parseInt(datatype)) + " ) ");
-            }
-            System.out.print("\n");
-        }
+        var dbc = new DbMetadata("jdbc:postgresql://localhost:5432/air", "postgres", "admin");
+        System.out.print(dbc.getTables());
 
     }
 }
