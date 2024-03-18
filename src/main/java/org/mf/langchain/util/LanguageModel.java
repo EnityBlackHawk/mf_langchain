@@ -1,8 +1,7 @@
-package org.mf.langchain;
+package org.mf.langchain.util;
 
 import dev.langchain4j.model.chat.ChatLanguageModel;
-import org.springframework.context.annotation.Bean;
-import org.springframework.stereotype.Component;
+import org.mf.langchain.util.TemplatedThread;
 
 
 public record LanguageModel(ChatLanguageModel chatLanguageModel) {

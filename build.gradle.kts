@@ -24,6 +24,7 @@ dependencies {
     implementation("dev.langchain4j:langchain4j-local-ai:0.27.1")
     implementation("dev.langchain4j:langchain4j-hugging-face:0.27.1")
     implementation("dev.langchain4j:langchain4j-vertex-ai-gemini:0.27.1")
+    runtimeOnly("org.postgresql:postgresql")
 
 }
 

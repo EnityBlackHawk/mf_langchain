@@ -1,33 +1,19 @@
 package org.mf.langchain;
 
-import dev.langchain4j.data.message.AiMessage;
-import dev.langchain4j.model.StreamingResponseHandler;
-import dev.langchain4j.model.chat.ChatLanguageModel;
-import dev.langchain4j.model.chat.StreamingChatLanguageModel;
-import dev.langchain4j.model.huggingface.HuggingFaceChatModel;
-import dev.langchain4j.model.localai.LocalAiChatModel;
-import dev.langchain4j.model.localai.LocalAiStreamingChatModel;
-import dev.langchain4j.model.openai.OpenAiChatModel;
-import dev.langchain4j.model.openai.OpenAiChatModelName;
-import dev.langchain4j.model.openai.OpenAiLanguageModel;
-import dev.langchain4j.model.openai.OpenAiLanguageModelName;
-import dev.langchain4j.model.vertexai.VertexAiGeminiChatModel;
-import dev.langchain4j.service.AiServices;
-import org.mf.langchain.service.LangChainService;
+import org.mf.langchain.util.SqlDataType;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import dev.langchain4j.model.vertexai.VertexAiGeminiStreamingChatModel;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.time.Duration;
-import java.util.Scanner;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 @SpringBootApplication
 public class LangchainApplication {
 
-    public static void main(String[] args) throws IOException {
+
+    public static void main(String[] args) throws IOException, SQLException {
         var context = SpringApplication.run(LangchainApplication.class, args);
 
 //        StreamingChatLanguageModel model = LocalAiStreamingChatModel.builder()
@@ -38,16 +24,39 @@ public class LangchainApplication {
 //                .build();
         // AIzaSyBiyiDDkyHuu3d98AZmHX9nTxmheKKBfWk
 
-        StreamingChatLanguageModel model = VertexAiGeminiStreamingChatModel.builder()
-                .modelName("gemini-pro")
-                .project("gen-lang-client-0095677353")
-                .location("pt-BR")
-                .build();
+//        StreamingChatLanguageModel model = VertexAiGeminiStreamingChatModel.builder()
+//                .modelName("gemini-pro")
+//                .project("gen-lang-client-0095677353")
+//                .location("pt-BR")
+//                .build();
+//
+//        Assistant assistant = AiServices.create(Assistant.class, model);
+//
+//        var ts = assistant.chat("Considering a relational bank:\\n Clients(id, name)\\n Invoice(id, revenue, client_id) client_id references Clients\\n Generate a Java class to generate MongoDB documents following the following specifications:\\nClients -> Invoice");
+//        ts.onNext(System.out::print).onError(Throwable::printStackTrace).start();
 
-        Assistant assistant = AiServices.create(Assistant.class, model);
+        var connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/air", "postgres", "admin");
+        if(connection.isClosed())
+            throw new RuntimeException("ERROR MANOOO");
+        var metaData = connection.getMetaData();
 
-        var ts = assistant.chat("Considering a relational bank:\\n Clients(id, name)\\n Invoice(id, revenue, client_id) client_id references Clients\\n Generate a Java class to generate MongoDB documents following the following specifications:\\nClients -> Invoice");
-        ts.onNext(System.out::print).onError(Throwable::printStackTrace).start();
+        String name = metaData.getDatabaseProductName();
+
+        System.out.println(name);
+        ResultSet tbs = metaData.getTables(null, null, null, new String[] {"TABLE"});
+
+        while(tbs.next()) {
+            String tb_name = tbs.getString("TABLE_NAME");
+            System.out.print(tb_name + " ");
+            ResultSet cls = metaData.getColumns(null, null, tb_name, null);
+            while (cls.next())
+            {
+                String columnName = cls.getString("COLUMN_NAME");
+                String datatype = cls.getString("DATA_TYPE");
+                System.out.print("(" + columnName + " - " + SqlDataType.getByValue(Integer.parseInt(datatype)) + " ) ");
+            }
+            System.out.print("\n");
+        }
 
     }
 }

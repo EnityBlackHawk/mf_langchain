@@ -1,12 +1,10 @@
 package org.mf.langchain.service;
 
 import dev.langchain4j.data.message.AiMessage;
-import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.localai.LocalAiChatModel;
 import dev.langchain4j.model.localai.LocalAiStreamingChatModel;
 import org.jetbrains.annotations.Nullable;
-import org.mf.langchain.Assistant;
-import org.mf.langchain.LanguageModel;
+import org.mf.langchain.util.LanguageModel;
 import org.mf.langchain.StreamLanguageModel;
 import org.springframework.stereotype.Service;
 

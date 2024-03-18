@@ -1,4 +1,4 @@
-package org.mf.langchain;
+package org.mf.langchain.util;
 
 import lombok.SneakyThrows;
 
