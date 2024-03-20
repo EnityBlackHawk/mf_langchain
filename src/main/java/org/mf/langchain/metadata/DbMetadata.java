@@ -1,6 +1,7 @@
 package org.mf.langchain.metadata;
 
 import lombok.Getter;
+import org.jetbrains.annotations.Nullable;
 import org.mf.langchain.util.SqlDataType;
 
 import java.sql.*;
@@ -18,7 +19,7 @@ public class DbMetadata {
         _connection = connection;
     }
 
-    public DbMetadata(String connectionString, String username, String password) throws SQLException {
+    public DbMetadata(String connectionString, String username, String password, @Nullable String tableNamePatter) throws SQLException {
         Connection tmp_connection;
         try {
             tmp_connection = DriverManager.getConnection(connectionString, username, password);
@@ -31,7 +32,7 @@ public class DbMetadata {
 
         _metadata = _connection.getMetaData();
 
-        ResultSet tbs = _metadata.getTables(null, null, "TB_%", new String[] {"TABLE"});
+        ResultSet tbs = _metadata.getTables(null, null, tableNamePatter, new String[] {"TABLE"});
 
         while(tbs.next()) {
             ArrayList<Column> columnArrayList = new ArrayList<>();
