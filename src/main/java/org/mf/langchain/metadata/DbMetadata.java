@@ -31,7 +31,7 @@ public class DbMetadata {
 
         _metadata = _connection.getMetaData();
 
-        ResultSet tbs = _metadata.getTables(null, null, null, new String[] {"TABLE"});
+        ResultSet tbs = _metadata.getTables(null, null, "TB_%", new String[] {"TABLE"});
 
         while(tbs.next()) {
             ArrayList<Column> columnArrayList = new ArrayList<>();
