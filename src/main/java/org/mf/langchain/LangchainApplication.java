@@ -37,7 +37,7 @@ public class LangchainApplication {
 //        var ts = assistant.chat("Considering a relational bank:\\n Clients(id, name)\\n Invoice(id, revenue, client_id) client_id references Clients\\n Generate a Java class to generate MongoDB documents following the following specifications:\\nClients -> Invoice");
 //        ts.onNext(System.out::print).onError(Throwable::printStackTrace).start();
 
-        var dbc = new DbMetadata("jdbc:postgresql://localhost:5432/air", "postgres", "admin");
+        var dbc = new DbMetadata("jdbc:h2:mem:testdb", "sa", "password");
         String s = "";
         for(var x  : dbc.getTables()){
             s = s.concat(x.toString());
