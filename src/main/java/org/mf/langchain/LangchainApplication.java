@@ -40,11 +40,12 @@ public class LangchainApplication {
         var dbc = new DbMetadata("jdbc:h2:mem:testdb", "sa", "password", "TB_%");
         String s = "";
         for(var x  : dbc.getTables()){
-            s = s.concat(x.toString());
+            s = s.concat(x.toString() + "\n");
         }
-        GeminiService gs = context.getBean(GeminiService.class);
-        System.out.print(
-                gs.getCompletion("Using this database: " + s + " Generate a SQL that selects all flights sorted by airline name.")
-        );
+        System.out.println(s);
+//        GeminiService gs = context.getBean(GeminiService.class);
+//        System.out.print(
+//                gs.getCompletion("Using this database: " + s + " Generate a SQL that selects all flights sorted by airline name.")
+//        );
     }
 }

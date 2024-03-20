@@ -6,6 +6,7 @@ import org.mf.langchain.util.SqlDataType;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 
@@ -36,15 +37,44 @@ public class DbMetadata {
 
         while(tbs.next()) {
             ArrayList<Column> columnArrayList = new ArrayList<>();
+            ArrayList<String> pk_names = new ArrayList<>();
+            HashMap<String, Column.FkInfo> fks_info = new HashMap<>();
             String tb_name = tbs.getString("TABLE_NAME");
             ResultSet cls = _metadata.getColumns(null, null, tb_name, null);
+            ResultSet pks = _metadata.getPrimaryKeys(null, null, tb_name);
+            ResultSet fks = _metadata.getImportedKeys(null, null, tb_name);
+
+            while(pks.next())
+            {
+                String columnName = pks.getString("COLUMN_NAME");
+                pk_names.add(columnName);
+            }
+
+            while (fks.next())
+            {
+                String pkTableName = fks.getString("PKTABLE_NAME");
+                String pkColumnName = fks.getString("PKCOLUMN_NAME");
+                String fkTableName = fks.getString("FKTABLE_NAME");
+                String fkColumnName = fks.getString("FKCOLUMN_NAME");
+                Column.FkInfo fi = new Column.FkInfo(
+                        fkColumnName,
+                        pkTableName,
+                        pkColumnName
+                );
+                fks_info.put(fkColumnName, fi);
+            }
+
             while (cls.next())
             {
                 String columnName = cls.getString("COLUMN_NAME");
                 String datatype = cls.getString("DATA_TYPE");
 
                 columnArrayList.add(
-                        new Column(columnName, SqlDataType.getByValue(Integer.parseInt(datatype)))
+                        new Column(columnName,
+                                SqlDataType.getByValue(Integer.parseInt(datatype)),
+                                pk_names.contains(columnName),
+                                fks_info.getOrDefault(columnName, null)
+                        )
                 );
 
             }
