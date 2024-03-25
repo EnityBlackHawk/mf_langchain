@@ -1,6 +1,7 @@
 package org.mf.langchain;
 
 import org.mf.langchain.metadata.DbMetadata;
+import org.mf.langchain.repositories.AirportRepository;
 import org.mf.langchain.service.GeminiService;
 import org.mf.langchain.util.SqlDataType;
 import org.springframework.boot.SpringApplication;
@@ -37,13 +38,19 @@ public class LangchainApplication {
 //        var ts = assistant.chat("Considering a relational bank:\\n Clients(id, name)\\n Invoice(id, revenue, client_id) client_id references Clients\\n Generate a Java class to generate MongoDB documents following the following specifications:\\nClients -> Invoice");
 //        ts.onNext(System.out::print).onError(Throwable::printStackTrace).start();
 
+
+        var airportRepo = context.getBean(AirportRepository.class);
+
+        DataImporter.Companion.importAirports("C:\\Users\\Luan\\Documents\\mf_langchain\\airports.json", airportRepo);
+
+
         var dbc = new DbMetadata("jdbc:h2:mem:testdb", "sa", "password", "TB_%");
         String s = "";
         for(var x  : dbc.getTables()){
             s = s.concat(x.toString() + "\n");
         }
         System.out.println(s);
-//        GeminiService gs = context.getBean(GeminiService.class);
+        GeminiService gs = context.getBean(GeminiService.class);
 //        System.out.print(
 //                gs.getCompletion("Using this database: " + s + " Generate a SQL that selects all flights sorted by airline name.")
 //        );

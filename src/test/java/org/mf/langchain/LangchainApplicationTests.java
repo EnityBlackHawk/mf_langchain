@@ -22,4 +22,11 @@ class LangchainApplicationTests {
         System.out.println(text);
     }
 
+    @Test
+    void ImportAirports(){
+        String result = DataImporter.Companion.importAirports("C:\\Users\\Luan\\Documents\\mf_langchain\\airports.json", null);
+        assertNotNull(result);
+        System.out.println(result);
+    }
+
 }

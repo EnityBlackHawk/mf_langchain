@@ -1,5 +1,6 @@
 package org.mf.langchain.metadata;
 
+import jakarta.persistence.EntityManager;
 import lombok.Getter;
 import org.jetbrains.annotations.Nullable;
 import org.mf.langchain.util.SqlDataType;

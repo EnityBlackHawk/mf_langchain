@@ -2,13 +2,13 @@ plugins {
     java
     id("org.springframework.boot") version "3.2.2"
     id("io.spring.dependency-management") version "1.1.4"
+    kotlin("jvm")
 }
 
 group = "org.mf"
 version = "0.0.1-SNAPSHOT"
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_17
 }
 
 repositories {
@@ -27,9 +27,14 @@ dependencies {
     implementation("dev.langchain4j:langchain4j-vertex-ai-gemini:0.27.1")
     runtimeOnly("org.postgresql:postgresql")
     runtimeOnly("com.h2database:h2")
+    implementation(kotlin("stdlib-jdk8"))
+    implementation("com.google.code.gson:gson:2.10.1")
 
 }
 
 tasks.withType<Test> {
     useJUnitPlatform()
+}
+kotlin {
+    jvmToolchain(17)
 }

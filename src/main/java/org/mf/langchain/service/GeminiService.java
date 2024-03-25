@@ -32,7 +32,7 @@ public class GeminiService {
     public String getCompletion(String text) {
         GeminiResponse.Root response = getCompletion(new GeminiRequest.Root(
                 List.of(new GeminiRequest.Content(List.of(new GeminiRequest.TextPart(text))))));
-        return response.candidates().getFirst().content().parts().getFirst().text();
+        return response.candidates().get(0).content().parts().get(0).text();
     }
 
 }
