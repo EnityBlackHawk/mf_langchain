@@ -1,6 +1,7 @@
 package org.mf.langchain;
 
 import org.mf.langchain.metadata.DbMetadata;
+import org.mf.langchain.repositories.AirlineRepository;
 import org.mf.langchain.repositories.AirportRepository;
 import org.mf.langchain.service.GeminiService;
 import org.mf.langchain.util.SqlDataType;
@@ -40,8 +41,10 @@ public class LangchainApplication {
 
 
         var airportRepo = context.getBean(AirportRepository.class);
+        var airlinesRepo = context.getBean(AirlineRepository.class);
 
         DataImporter.Companion.importAirports("C:\\Users\\Luan\\Documents\\mf_langchain\\airports.json", airportRepo);
+        DataImporter.Companion.importAirlines("C:\\Users\\Luan\\Documents\\mf_langchain\\airlines.json", airlinesRepo);
 
 
         var dbc = new DbMetadata("jdbc:h2:mem:testdb", "sa", "password", "TB_%");
