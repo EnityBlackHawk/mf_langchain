@@ -54,8 +54,8 @@ public class LangchainApplication {
         }
         System.out.println(s);
         GeminiService gs = context.getBean(GeminiService.class);
-//        System.out.print(
-//                gs.getCompletion("Using this database: " + s + " Generate a SQL that selects all flights sorted by airline name.")
-//        );
+        System.out.print(
+                gs.getCompletion("Using this database: " + s + " Eu quero migrar meu banco relacional para o não relaional. Qual o melhor esquema de banco de dados NoSQL orientado a documentos (MongoDB) eu devo utilizar ? Gere um json_schema da organização dos dados")
+        );
     }
 }

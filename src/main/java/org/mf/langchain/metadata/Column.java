@@ -11,18 +11,19 @@ public record Column(String name, SqlDataType dataType, Boolean isPk, @Nullable 
     }
 
     public record FkInfo(String columnName, String pk_tableName, String pk_name){
-        @Override
-        public String toString() {
+
+        public String toString_() {
             return columnName + " REFERENCES " + pk_tableName;
         }
 
-        public String toStringSQL() {
+        @Override
+        public String toString() {
             return " REFERENCES " + pk_tableName + "(" + pk_name + ")";
         }
     }
 
     @Override
     public String toString() {
-        return name + " : " + dataType.name();
+        return name + " " + dataType.name() + (isPk ? " PRIMARY KEY" : "" ) + (isFk() ? fkInfo.toString() : "") ;
     }
 }

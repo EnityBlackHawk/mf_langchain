@@ -33,6 +33,6 @@ CREATE TABLE tb_flight (
                         arrival_time_scheduled TIMESTAMP,
                         arrival_time_actual TIMESTAMP,
                         gate INT,
-                        aircraft INT REFERENCES tb_flight(id),
+                        aircraft INT REFERENCES tb_aircraft(id),
                         connects_to TEXT REFERENCES tb_flight(number)
 );

@@ -6,16 +6,13 @@ public record Table(String name, List<Column> columns) {
 
     @Override
     public String toString() {
-        String fkr = "";
-        String s = name + " ( ";
+        String s = "CREATE TABLE " + name + " ( \n";
+        int count = 0;
         for (Column e : columns) {
-            s = s.concat(e.toString() + ", ");
-            if(e.isFk()){
-                assert e.fkInfo() != null;
-                fkr = fkr.concat(e.fkInfo().toString() + ", ");
-            }
+            s = s.concat("\t" + e.toString() + (count < columns.size() - 1 ? ",\n" : "\n"));
+            count++;
         }
-        s = s.concat(") " + fkr);
+        s = s.concat(");");
         return s;
     }
 }
