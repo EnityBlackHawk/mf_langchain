@@ -55,7 +55,8 @@ public class LangchainApplication {
         System.out.println(s);
         GeminiService gs = context.getBean(GeminiService.class);
         System.out.print(
-                gs.getCompletion("Using this database: " + s + " Eu quero migrar meu banco relacional para o não relaional. Qual o melhor esquema de banco de dados NoSQL orientado a documentos (MongoDB) eu devo utilizar ? Gere um json_schema da organização dos dados")
+                gs.getCompletion("Using this database: " + s +
+                        " I would like to migrate my database from Postgres to MongoDB. What is the best database schema for MongoDB base on my actual database. Keep in mind that I want to prioritise performace ? Generate a JSON Schema for import in MongoDB applying the performance optimizations")
         );
     }
 }
