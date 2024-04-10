@@ -11,7 +11,7 @@ import java.util.List;
 @Service
 public class GeminiService {
 
-    public static final String GEMINI_PRO = "gemini-pro";
+    public static final String GEMINI_PRO = "gemini-1.5-pro-latest";
     public static final String GEMINI_PRO_VISION = "gemini-pro-vision";
 
     private final GeminiInterface geminiInterface;

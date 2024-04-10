@@ -1,5 +1,9 @@
 package org.mf.langchain;
 
+import dev.langchain4j.model.openai.OpenAiChatModel;
+import dev.langchain4j.model.openai.OpenAiChatModelName;
+import dev.langchain4j.service.AiServices;
+import org.mf.langchain.gemini.GeminiChatLanguageModel;
 import org.mf.langchain.metadata.DbMetadata;
 import org.mf.langchain.repositories.AirlineRepository;
 import org.mf.langchain.repositories.AirportRepository;
@@ -52,11 +56,19 @@ public class LangchainApplication {
         for(var x  : dbc.getTables()){
             s = s.concat(x.toString() + "\n");
         }
-        System.out.println(s);
+
         GeminiService gs = context.getBean(GeminiService.class);
-        System.out.print(
-                gs.getCompletion("Using this database: " + s +
-                        " I would like to migrate my database from Postgres to MongoDB. What is the best database schema for MongoDB base on my actual database. Keep in mind that I want to prioritise performace ? Generate a JSON Schema for import in MongoDB applying the performance optimizations")
-        );
+//        var gpt = new OpenAiChatModel.OpenAiChatModelBuilder()
+//                .apiKey(System.getenv("GPT_KEY"))
+//                .modelName(OpenAiChatModelName.GPT_3_5_TURBO_0125)
+//                .maxRetries(1)
+//                .temperature(1.0)
+//                .build();
+        var assintant = AiServices.create(ChatAssistant.class, new GeminiChatLanguageModel(gs));
+        var pB = new PrompBuider(dbc, PrompBuider.StructureOptions.PREFER_PERFORMANCE);
+        System.out.println(pB);
+        var result = assintant.chat(pB.toString());
+        //System.out.println("Input Tokens: " + result.tokenUsage().inputTokenCount() + "\nOutput Tokens: " + result.tokenUsage().outputTokenCount());
+        System.out.print(result.content().text());
     }
 }

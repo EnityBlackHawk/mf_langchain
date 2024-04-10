@@ -1,6 +1,8 @@
 package org.mf.langchain;
 
 import dev.ai4j.openai4j.chat.AssistantMessage;
+import dev.langchain4j.model.openai.OpenAiChatModel;
+import dev.langchain4j.model.openai.OpenAiChatModelName;
 import dev.langchain4j.service.AiServices;
 import org.junit.jupiter.api.Test;
 import org.mf.langchain.gemini.GeminiChatLanguageModel;
@@ -19,11 +21,25 @@ class LangchainApplicationTests {
     @Autowired
     private GeminiService service;
 
+//    @Test
+//    void writeAStory() {
+//        var lm = new LanguageModel(new GeminiChatLanguageModel(service));
+//        var assistant = AiServices.create(ChatAssistant.class, lm.chatLanguageModel());
+//        String result = assistant.chat("Write a message to inspire me").content();
+//        assertNotNull(result);
+//        System.out.println(result);
+//    }
+
     @Test
-    void writeAStory() {
-        var lm = new LanguageModel(new GeminiChatLanguageModel(service));
-        var assistant = AiServices.create(ChatAssistant.class, lm.chatLanguageModel());
-        String result = assistant.chat("Write a message to inspire me");
+    void gpt(){
+        var gpt = new OpenAiChatModel.OpenAiChatModelBuilder()
+                .apiKey(System.getenv("GPT_KEY"))
+                .modelName(OpenAiChatModelName.GPT_3_5_TURBO_0125)
+                .maxRetries(1)
+                .temperature(1.0)
+                .maxTokens(500)
+                .build();
+        String result = gpt.generate("Are you gpt ?");
         assertNotNull(result);
         System.out.println(result);
     }
