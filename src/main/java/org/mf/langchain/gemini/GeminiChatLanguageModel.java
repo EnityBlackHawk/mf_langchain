@@ -1,6 +1,5 @@
 package org.mf.langchain.gemini;
 
-import dev.ai4j.openai4j.chat.ChatCompletionRequest;
 import dev.ai4j.openai4j.chat.SystemMessage;
 import dev.ai4j.openai4j.chat.UserMessage;
 import dev.langchain4j.agent.tool.ToolSpecification;
@@ -9,19 +8,15 @@ import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.openai.InternalOpenAiHelper;
 import dev.langchain4j.model.output.Response;
-import lombok.Builder;
-import org.mf.langchain.service.GeminiService;
 
 import java.util.List;
-
-import static dev.ai4j.openai4j.chat.Role.USER;
 
 
 public class GeminiChatLanguageModel implements ChatLanguageModel {
 
-    private final GeminiService service;
+    private final GeminiHttpClient service;
 
-    public GeminiChatLanguageModel(GeminiService service){
+    public GeminiChatLanguageModel(GeminiHttpClient service){
         this.service = service;
     }
 
@@ -51,7 +46,7 @@ public class GeminiChatLanguageModel implements ChatLanguageModel {
             }
             
         });
-        var result = service.getCompletion(
+        var result = service.generate(
                 x.reduce("", (msg, unit) -> msg + " " + unit)
         );
         return Response.from(AiMessage.from(result));

@@ -1,17 +1,10 @@
 package org.mf.langchain;
 
-import dev.ai4j.openai4j.chat.AssistantMessage;
 import dev.langchain4j.model.openai.OpenAiChatModel;
 import dev.langchain4j.model.openai.OpenAiChatModelName;
-import dev.langchain4j.service.AiServices;
 import org.junit.jupiter.api.Test;
-import org.mf.langchain.gemini.GeminiChatLanguageModel;
-import org.mf.langchain.service.GeminiService;
-import org.mf.langchain.util.LanguageModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-
-import javax.swing.plaf.basic.BasicInternalFrameTitlePane;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 

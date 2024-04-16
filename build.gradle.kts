@@ -29,6 +29,7 @@ dependencies {
     runtimeOnly("com.h2database:h2")
     implementation(kotlin("stdlib-jdk8"))
     implementation("com.google.code.gson:gson:2.10.1")
+    implementation("com.squareup.okhttp3:okhttp:5.0.0-alpha.9")
 
 }
 
