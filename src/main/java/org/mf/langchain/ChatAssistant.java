@@ -6,6 +6,6 @@ import dev.langchain4j.service.SystemMessage;
 
 public interface ChatAssistant {
 
-    @SystemMessage("No explanation, no markdown, only the Java's classes separated by ----- ")
+    //@SystemMessage("No explanation, no markdown, only the Java's classes separated by ----- ")
     Response<AiMessage> chat (String userMessage);
 }
