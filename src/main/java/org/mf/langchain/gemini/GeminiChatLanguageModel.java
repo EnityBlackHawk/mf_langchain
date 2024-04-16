@@ -1,5 +1,6 @@
 package org.mf.langchain.gemini;
 
+import dev.ai4j.openai4j.chat.AssistantMessage;
 import dev.ai4j.openai4j.chat.SystemMessage;
 import dev.ai4j.openai4j.chat.UserMessage;
 import dev.langchain4j.agent.tool.ToolSpecification;
@@ -9,7 +10,9 @@ import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.openai.InternalOpenAiHelper;
 import dev.langchain4j.model.output.Response;
 
+import java.util.ArrayList;
 import java.util.List;
+
 
 
 public class GeminiChatLanguageModel implements ChatLanguageModel {
@@ -32,24 +35,46 @@ public class GeminiChatLanguageModel implements ChatLanguageModel {
 
     @Override
     public Response<AiMessage> generate(List<ChatMessage> list) {
-        var x = InternalOpenAiHelper.toOpenAiMessages(list).stream().map((e) -> {
+        var contents = new ArrayList<GeminiRequest2.Content>();
+        InternalOpenAiHelper.toOpenAiMessages(list).stream().forEach((e) -> {
             switch (e.role()){
                 case USER -> {
-                    return (String)((UserMessage)e).content();
+                      contents.add(
+                              new GeminiRequest2.Content(
+                                      "user",
+                                      List.of(
+                                              new GeminiRequest2.Part((String)((UserMessage)e).content())
+                                      )
+                              )
+                      );
                 }
                 case SYSTEM -> {
-                    return ((SystemMessage)e).content();
+                    contents.add(
+                            new GeminiRequest2.Content(
+                                    "system",
+                                    List.of(
+                                            new GeminiRequest2.Part((String)((SystemMessage)e).content())
+                                    )
+                            )
+                    );
                 }
-                default -> {
-                    return "";
+                case ASSISTANT -> {
+                    contents.add(
+                            new GeminiRequest2.Content(
+                                    "model",
+                                    List.of(
+                                            new GeminiRequest2.Part((String)((AssistantMessage)e).content())
+                                    )
+                            )
+                    );
                 }
             }
             
         });
         var result = service.generate(
-                x.reduce("", (msg, unit) -> msg + " " + unit)
+                new GeminiRequest2(contents)
         );
-        return Response.from(AiMessage.from(result));
+        return Response.from(AiMessage.from(result.candidates().get(0).content().parts().get(0).text()));
     }
 
     @Override

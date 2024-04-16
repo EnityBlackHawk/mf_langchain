@@ -48,13 +48,12 @@ public class LangchainApplication {
                 .temperature(1.0)
                 .build();
         var assintant = AiServices.builder(ChatAssistant.class).chatLanguageModel(new GeminiChatLanguageModel(gs)).chatMemory(chatMemory).build();
-        System.out.println(assintant.chat("Hello"));
-//        var pB = new PrompBuider(dbc, PrompBuider.StructureOptions.PREFER_CONSISTENCY);
-//        while (pB.hasNext()) {
-//            var x = pB.next();
-//            System.out.println(x);
-//            var result = assintant.chat(x);
-//            System.out.println(result.content().text());
-//        }
+        var pB = new PrompBuider(dbc, PrompBuider.StructureOptions.PREFER_CONSISTENCY);
+        while (pB.hasNext()) {
+            var x = pB.next();
+            System.out.println(x);
+            var result = assintant.chat(x);
+            System.out.println(result.content().text());
+        }
     }
 }
