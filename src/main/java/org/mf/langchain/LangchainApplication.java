@@ -8,6 +8,9 @@ import dev.langchain4j.service.AiServices;
 import org.mf.langchain.gemini.GeminiChatLanguageModel;
 import org.mf.langchain.gemini.GeminiHttpClient;
 import org.mf.langchain.metadata.DbMetadata;
+import org.mf.langchain.prompt.MigrationPreferences;
+import org.mf.langchain.prompt.PrompData;
+import org.mf.langchain.prompt.Query;
 import org.mf.langchain.repositories.AirlineRepository;
 import org.mf.langchain.repositories.AirportRepository;
 import org.springframework.boot.SpringApplication;
@@ -32,10 +35,7 @@ public class LangchainApplication {
 
         var dbc = new DbMetadata("jdbc:h2:mem:testdb", "sa", "password", "TB_%");
         DataImporter.Companion.runSQL("/home/luan/Documents/mf_langchain/inserts.sql", dbc.getConnection());
-        String s = "";
-        for(var x  : dbc.getTables()){
-            s = s.concat(x.toString() + "\n");
-        }
+        PrompData pd = new PrompData(dbc, MigrationPreferences.PREFER_PERFORMANCE, Query.from("/home/luan/Documents/mf_langchain/most_used_selects.sql"));
 
 //        ChatMemory chatMemory = MessageWindowChatMemory.withMaxMessages(10);
 //        GeminiHttpClient gs = new GeminiHttpClient.Builder()
