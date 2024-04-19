@@ -11,6 +11,11 @@ import org.mf.langchain.DTO.AirlineJson
 import org.mf.langchain.model.Airline
 import org.mf.langchain.model.Airport
 import org.mf.langchain.repositories.AirlineRepository
+import org.springframework.core.io.PathResource
+import org.springframework.core.io.support.EncodedResource
+import org.springframework.jdbc.datasource.init.ScriptUtils
+import java.sql.Connection
+import kotlin.io.path.Path
 
 class DataImporter {
 
@@ -58,6 +63,20 @@ class DataImporter {
            }
            return airportJson[0].iata_code
         }
+        fun runSQL(path : String, connection : Connection) {
+            ScriptUtils.executeSqlScript(
+                connection,
+                EncodedResource(PathResource(path)),
+                false,
+                false,
+                ScriptUtils.DEFAULT_COMMENT_PREFIX,
+                ScriptUtils.DEFAULT_STATEMENT_SEPARATOR,
+                ScriptUtils.DEFAULT_BLOCK_COMMENT_START_DELIMITER,
+                ScriptUtils.DEFAULT_BLOCK_COMMENT_END_DELIMITER
+            );
+        }
     }
+
+
 
 }

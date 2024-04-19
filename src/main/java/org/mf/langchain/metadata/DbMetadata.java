@@ -98,6 +98,10 @@ public class DbMetadata {
         }
     }
 
+    public Connection getConnection() {
+        return _connection;
+    }
+
     public List<Table> getTables() {
         return tables;
     }

@@ -1,4 +1,4 @@
-package org.mf.langchain;
+package org.mf.langchain.prompt;
 
 import org.mf.langchain.metadata.DbMetadata;
 
@@ -12,7 +12,7 @@ public class PrompBuider implements Iterator<String> {
     private int callCount = 0;
 
     public static class StructureOptions {
-        public static String PREFER_PERFORMANCE = "can execute fast queries by embedding documents";
+        public static String PREFER_PERFORMANCE = "has embedded documents, not references";
         public static String PREFER_CONSISTENCY = "has less redundant data";
     }
 
@@ -40,9 +40,9 @@ public class PrompBuider implements Iterator<String> {
                         "\n" + "Please consider a structure that " + structureOptions;
             }
             case 2:
-                return "Now generate a Spring Data MongoDB classes for me: \n" +
+                return "Now generate a Spring Data MongoDB classes for that structure: \n" +
                         "- Use Lombok \n" +
-                        "- " + ((structureOptions.equals(StructureOptions.PREFER_PERFORMANCE)) ? "No not use @DBRef annotation" : "Use @DBRef annotation");
+                        "- " + ((structureOptions.equals(StructureOptions.PREFER_PERFORMANCE)) ? "Some documents are embedded" : "Use @DBRef annotation");
 
             default:
                 return null;
