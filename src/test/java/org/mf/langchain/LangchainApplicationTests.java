@@ -11,9 +11,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @SpringBootTest
 class LangchainApplicationTests {
 
-    @Autowired
-    private GeminiService service;
-
 //    @Test
 //    void writeAStory() {
 //        var lm = new LanguageModel(new GeminiChatLanguageModel(service));

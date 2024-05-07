@@ -1,7 +1,7 @@
 package org.mf.langchain.prompt;
 
 public enum MigrationPreferences {
-    PREFER_PERFORMANCE("has embedded documents, not references"),
+    PREFER_PERFORMANCE("uses embedded documents, not references"),
     PREFER_CONSISTENCY("has less redundant data");
 
     private final String description;
