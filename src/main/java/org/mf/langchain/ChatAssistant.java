@@ -6,6 +6,6 @@ import dev.langchain4j.service.SystemMessage;
 
 public interface ChatAssistant {
 
-    @SystemMessage("Generate Java classes and imports")
+    @SystemMessage("Generate Java files with classes and imports. Each file in a Markdown code block.")
     Response<AiMessage> chat (String userMessage);
 }

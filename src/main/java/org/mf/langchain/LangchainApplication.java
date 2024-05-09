@@ -23,7 +23,7 @@ import java.sql.SQLException;
 @SpringBootApplication
 public class LangchainApplication {
 
-    public static final boolean RUN_CACHED = true;
+    public static final boolean RUN_CACHED = false;
 
 
     public static void main(String[] args) throws IOException, SQLException {
@@ -58,7 +58,7 @@ public class LangchainApplication {
                 .build();
 
         var assintant = AiServices.builder(ChatAssistant.class).chatLanguageModel(gpt).chatMemory(chatMemory).build();
-        String finalResult = RUN_CACHED ? ConvertToJavaFile.MOCK_2 : null;
+        String finalResult = RUN_CACHED ? ConvertToJavaFile.getFromFile("./") : null;
 //        while (!RUN_CACHED && pd.hasNext()) {
 //            var x = pd.next();
 //            System.out.println(x);
@@ -73,9 +73,14 @@ public class LangchainApplication {
             var result = assintant.chat(x);
             System.out.println(result.content().text());
             finalResult = result.content().text();
+            ConvertToJavaFile.saveToFile("./", finalResult);
         }
 
-        ConvertToJavaFile.toFile("/home/luan/Documents/mf_langchain/src/main/java/org/mf/langchain/auto/", finalResult);
+        ConvertToJavaFile.toFile(
+                "/home/luan/Documents/mf_langchain/src/main/java/org/mf/langchain/auto/",
+                "org.mf.langchain.auto",
+                finalResult
+        );
 
     }
 }

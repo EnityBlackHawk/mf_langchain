@@ -1,8 +1,8 @@
 package org.mf.langchain;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 public class ConvertToJavaFile {
 
@@ -70,28 +70,17 @@ public class ConvertToJavaFile {
             "These Java classes are structured with Lombok annotations for getter, setter, and constructor generation. The classes are suitable for use with the Spring Data MongoDB framework, with embedded documents for Airport, Aircraft, Airline, and Manufacturer within the Flight object.";
 
     public static String MOCK_2 = "```java\n" +
+            "import lombok.Data;\n" +
             "import org.springframework.data.annotation.Id;\n" +
-            "import org.springframework.data.mongodb.core.mapping.DBRef;\n" +
             "import org.springframework.data.mongodb.core.mapping.Document;\n" +
             "\n" +
-            "import lombok.AllArgsConstructor;\n" +
-            "import lombok.Data;\n" +
-            "import lombok.NoArgsConstructor;\n" +
-            "\n" +
-            "@Document\n" +
             "@Data\n" +
-            "@NoArgsConstructor\n" +
-            "@AllArgsConstructor\n" +
+            "@Document\n" +
             "public class Aircraft {\n" +
             "    @Id\n" +
             "    private Integer id;\n" +
-            "    \n" +
-            "    @DBRef\n" +
-            "    private Airline airline;\n" +
-            "\n" +
-            "    @DBRef\n" +
-            "    private Manufacturer manufacturer;\n" +
-            "\n" +
+            "    private Integer airline;\n" +
+            "    private Integer manufacturerId;\n" +
             "    private Integer maxPassengers;\n" +
             "    private String registration;\n" +
             "    private String type;\n" +
@@ -99,17 +88,12 @@ public class ConvertToJavaFile {
             "```\n" +
             "\n" +
             "```java\n" +
+            "import lombok.Data;\n" +
             "import org.springframework.data.annotation.Id;\n" +
             "import org.springframework.data.mongodb.core.mapping.Document;\n" +
             "\n" +
-            "import lombok.AllArgsConstructor;\n" +
-            "import lombok.Data;\n" +
-            "import lombok.NoArgsConstructor;\n" +
-            "\n" +
-            "@Document\n" +
             "@Data\n" +
-            "@NoArgsConstructor\n" +
-            "@AllArgsConstructor\n" +
+            "@Document\n" +
             "public class Airline {\n" +
             "    @Id\n" +
             "    private Integer id;\n" +
@@ -120,17 +104,12 @@ public class ConvertToJavaFile {
             "```\n" +
             "\n" +
             "```java\n" +
+            "import lombok.Data;\n" +
             "import org.springframework.data.annotation.Id;\n" +
             "import org.springframework.data.mongodb.core.mapping.Document;\n" +
             "\n" +
-            "import lombok.AllArgsConstructor;\n" +
-            "import lombok.Data;\n" +
-            "import lombok.NoArgsConstructor;\n" +
-            "\n" +
-            "@Document\n" +
             "@Data\n" +
-            "@NoArgsConstructor\n" +
-            "@AllArgsConstructor\n" +
+            "@Document\n" +
             "public class Airport {\n" +
             "    @Id\n" +
             "    private String id;\n" +
@@ -141,75 +120,95 @@ public class ConvertToJavaFile {
             "```\n" +
             "\n" +
             "```java\n" +
+            "import lombok.Data;\n" +
             "import org.springframework.data.annotation.Id;\n" +
             "import org.springframework.data.mongodb.core.mapping.DBRef;\n" +
             "import org.springframework.data.mongodb.core.mapping.Document;\n" +
             "\n" +
-            "import lombok.AllArgsConstructor;\n" +
-            "import lombok.Data;\n" +
-            "import lombok.NoArgsConstructor;\n" +
+            "import java.util.Date;\n" +
             "\n" +
-            "@Document\n" +
             "@Data\n" +
-            "@NoArgsConstructor\n" +
-            "@AllArgsConstructor\n" +
+            "@Document\n" +
             "public class Flight {\n" +
             "    @Id\n" +
             "    private String number;\n" +
-            "    \n" +
-            "    @DBRef\n" +
-            "    private Aircraft aircraft;\n" +
-            "\n" +
+            "    private Integer aircraftId;\n" +
             "    private Integer gate;\n" +
-            "    private String arrivalTimeScheduled;\n" +
-            "    private String arrivalTimeActual;\n" +
-            "    private String departureTimeScheduled;\n" +
-            "    private String departureTimeActual;\n" +
-            "\n" +
+            "    private Date arrivalTimeActual;\n" +
+            "    private Date arrivalTimeScheduled;\n" +
+            "    private Date departureTimeActual;\n" +
+            "    private Date departureTimeScheduled;\n" +
             "    @DBRef\n" +
             "    private Airport airportFrom;\n" +
-            "\n" +
             "    @DBRef\n" +
             "    private Airport airportTo;\n" +
-            "\n" +
             "    @DBRef\n" +
             "    private Flight connectsTo;\n" +
             "}\n" +
             "```\n" +
             "\n" +
             "```java\n" +
+            "import lombok.Data;\n" +
             "import org.springframework.data.annotation.Id;\n" +
             "import org.springframework.data.mongodb.core.mapping.Document;\n" +
             "\n" +
-            "import lombok.AllArgsConstructor;\n" +
-            "import lombok.Data;\n" +
-            "import lombok.NoArgsConstructor;\n" +
-            "\n" +
-            "@Document\n" +
             "@Data\n" +
-            "@NoArgsConstructor\n" +
-            "@AllArgsConstructor\n" +
+            "@Document\n" +
             "public class Manufacturer {\n" +
             "    @Id\n" +
             "    private Integer id;\n" +
             "    private String name;\n" +
             "}\n" +
-            "```";
+            "```\n";
+//            "\n" +
+//            "Classes Generated: Aircraft, Airline, Airport, Flight, Manufacturer.";
 
-    public static void toFile(String path, String content) {
 
-        var contents = content.split("```\n\n```java");
-
-        contents[0] = contents[0].substring(8);
-        contents[contents.length -1] = contents[contents.length -1].substring(0, contents[contents.length -1].indexOf('`'));
-
+    public static String getFromFile(String path) {
         try {
-                BufferedWriter writer = new BufferedWriter(new FileWriter(path + "classes.java"));
-                for(String c : contents)
-                    writer.write(c);
+            BufferedReader reader = new BufferedReader(new FileReader(path + "cache.txt"));
+            return reader.lines().collect(Collectors.joining(System.lineSeparator()));
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static void saveToFile(String path, String content) {
+        try {
+            BufferedWriter writer = new BufferedWriter(new FileWriter(path + "cache.txt"));
+            writer.write(content);
+            writer.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static void toFile(String path, String _package, String content) {
+
+
+        var contents = new ArrayList<String>();
+        while(true){
+            var start = content.indexOf("```java");
+            if(start == -1)
+                break;
+            var start_2 = content.substring(start + 8);
+            var end = start_2.indexOf("```");
+            contents.add(start_2.substring(0, end));
+            content = content.substring(start + 8 + end);
+        }
+
+        for(String c : contents){
+            var classNameIndex = c.indexOf("class");
+            var className = c.substring(classNameIndex + 6, c.indexOf("{")).trim();
+            try {
+                BufferedWriter writer = new BufferedWriter(new FileWriter(path + className + ".java"));
+                writer.write("package " + _package + ";\n\n");
+                writer.write(c);
                 writer.close();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+        }
+
     }
 }
