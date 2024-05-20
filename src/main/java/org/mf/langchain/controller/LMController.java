@@ -41,7 +41,6 @@ public class LMController {
             }
         }, emitter::completeWithError, (m) -> emitter.complete());
 
-
         return emitter;
     }
 

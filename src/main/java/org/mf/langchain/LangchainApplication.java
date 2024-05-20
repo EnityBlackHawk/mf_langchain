@@ -28,7 +28,7 @@ public class LangchainApplication {
 
     public static void main(String[] args) throws IOException, SQLException {
         var context = SpringApplication.run(LangchainApplication.class, args);
-
+        /*
         var airportRepo = context.getBean(AirportRepository.class);
         var airlinesRepo = context.getBean(AirlineRepository.class);
 
@@ -81,6 +81,6 @@ public class LangchainApplication {
                 "org.mf.langchain.auto",
                 finalResult
         );
-
+        */
     }
 }

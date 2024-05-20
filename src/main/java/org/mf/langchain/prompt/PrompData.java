@@ -16,12 +16,21 @@ public class PrompData implements Iterator<String> {
     private DbMetadata dbMetadata;
     private Framework framework;
     private int callCount = 0;
+    private String sqlTables;
 
     public PrompData(DbMetadata dbMetadata, MigrationPreferences migrationPreference, Framework framework, List<Query> queryList) {
         this.queryList = queryList;
         this.migrationPreference = migrationPreference;
         this.dbMetadata = dbMetadata;
         this.framework = framework;
+    }
+
+    public PrompData(String sqlTables, MigrationPreferences migrationPreference, Framework framework, List<Query> queryList) {
+        this.queryList = queryList;
+        this.migrationPreference = migrationPreference;
+        this.framework = framework;
+        this.sqlTables = sqlTables;
+        this.dbMetadata = null;
     }
 
     public Query getQuery(int index) {
@@ -34,8 +43,13 @@ public class PrompData implements Iterator<String> {
 
     public Pair<String, String> getSqlTablesAndQueries(){
         String s = "";
-        for (var x : dbMetadata.getTables()) {
-            s = s.concat(x.toString() + "\n");
+        if(dbMetadata != null) {
+            for (var x : dbMetadata.getTables()) {
+                s = s.concat(x.toString() + "\n");
+            }
+        }
+        else {
+            s = sqlTables;
         }
 
         String q = "";

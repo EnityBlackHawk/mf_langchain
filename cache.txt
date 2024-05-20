@@ -1,60 +1,87 @@
 ```java
-import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.DBRef;
+// Airline.java
+import lombok.Data;
+import org.springframework.data.annotation.Id;
 
-@Document
-public class Aircraft {
-    private Integer airline;
-    private Integer id;
-    @DBRef
-    private Manufacturer manufacturer;
-    private Integer maxPassengers;
-    private String registration;
-    private String type;
-
-}
-
-@Document
+@Data
 public class Airline {
+    @Id
     private Integer id;
     private String iata;
     private String icao;
     private String name;
-
 }
+```
 
-@Document
+```java
+// Aircraft.java
+import lombok.Data;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.DBRef;
+
+@Data
+public class Aircraft {
+    @Id
+    private Integer id;
+    @DBRef
+    private Airline airline;
+    private Integer manufacturerId;
+    private Integer maxPassengers;
+    private String registration;
+    private String type;
+}
+```
+
+```java
+// Airport.java
+import lombok.Data;
+import org.springframework.data.annotation.Id;
+
+@Data
 public class Airport {
+    @Id
+    private String id;
     private String city;
     private String country;
-    private String id;
     private String name;
-
 }
+```
 
-@Document
+```java
+// Flight.java
+import lombok.Data;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.DBRef;
+
+@Data
 public class Flight {
+    @Id
+    private String number;
+    private Integer gate;
+    private String departureTimeScheduled;
+    private String departureTimeActual;
+    private String arrivalTimeScheduled;
+    private String arrivalTimeActual;
     @DBRef
     private Aircraft aircraft;
-    private Integer gate;
-    private Long arrivalTimeActual;
-    private Long arrivalTimeScheduled;
-    private Long departureTimeActual;
-    private Long departureTimeScheduled;
     @DBRef
     private Airport airportFrom;
     @DBRef
     private Airport airportTo;
     @DBRef
     private Flight connectsTo;
-    private String number;
-
 }
+```
 
-@Document
+```java
+// Manufacturer.java
+import lombok.Data;
+import org.springframework.data.annotation.Id;
+
+@Data
 public class Manufacturer {
+    @Id
     private Integer id;
     private String name;
-
 }
-```  
+```
