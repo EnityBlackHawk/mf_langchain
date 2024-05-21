@@ -17,20 +17,24 @@ public class PrompData implements Iterator<String> {
     private Framework framework;
     private int callCount = 0;
     private String sqlTables;
+    private boolean allowReferences;
+    private List<String> customPrompts;
 
-    public PrompData(DbMetadata dbMetadata, MigrationPreferences migrationPreference, Framework framework, List<Query> queryList) {
+    public PrompData(DbMetadata dbMetadata, MigrationPreferences migrationPreference, Boolean allowReferences, Framework framework, List<Query> queryList) {
         this.queryList = queryList;
         this.migrationPreference = migrationPreference;
         this.dbMetadata = dbMetadata;
         this.framework = framework;
     }
 
-    public PrompData(String sqlTables, MigrationPreferences migrationPreference, Framework framework, List<Query> queryList) {
+    public PrompData(String sqlTables, MigrationPreferences migrationPreference, Boolean allowReferences, Framework framework, List<Query> queryList, List<String> customPrompts) {
         this.queryList = queryList;
         this.migrationPreference = migrationPreference;
         this.framework = framework;
         this.sqlTables = sqlTables;
         this.dbMetadata = null;
+        this.allowReferences = allowReferences;
+        this.customPrompts = customPrompts;
     }
 
     public Query getQuery(int index) {
@@ -65,10 +69,18 @@ public class PrompData implements Iterator<String> {
         String s = tq.getFirst();
         String q = tq.getSecond();
 
-         return "Suggest a MongoDB structure for this relational database: \n" + s + "\n" + "- Please consider a structure that are optimized for this queries: \n" + q + "\n" + "- Please consider a structure that: \n" +
+         var result =  "Suggest a MongoDB structure for this relational database: \n" + s + "\n" +
+                 (!q.isEmpty() ? "- Please consider a structure that are optimized for this queries: \n" + q : "") +
+                 "\n" + "- Please consider a structure that: \n" +
                 "- Use Lombok \n" +
                 "- Optimized for "+ framework.getFramework() +" framework \n" +
-                "- If has references, use @DBRef annotation";
+                 (allowReferences ? "- Can use references when necessary \n" : "- Do not use references, only use embedded the documents \n") +
+                "- " + migrationPreference.getDescription() + "\n";
+
+         for(var x : customPrompts) {
+             result = result.concat("- " + x + "\n");
+         }
+         return result;
     }
 
     @Override

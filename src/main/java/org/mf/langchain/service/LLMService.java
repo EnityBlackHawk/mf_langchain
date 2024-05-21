@@ -19,29 +19,26 @@ import java.util.Date;
 @Service
 public class LLMService {
 
-    private final ChatAssistant gptAssistant;
-
-    LLMService() {
-        var gpt = new OpenAiChatModel.OpenAiChatModelBuilder()
-                .apiKey(System.getenv("GPT_KEY"))
-                .modelName(OpenAiChatModelName.GPT_3_5_TURBO_0125)
-                .maxRetries(1)
-                .temperature(1.0)
-                .build();
-        gptAssistant = AiServices.builder(ChatAssistant.class).chatLanguageModel(gpt).build();
-    }
 
     public MfResponse Generate(SpecificationDTO spec) {
+
+        var gpt = new OpenAiChatModel.OpenAiChatModelBuilder()
+                .apiKey(System.getenv("GPT_KEY"))
+                .modelName(spec.LLM())
+                .maxRetries(1)
+                .temperature(0.5)
+                .build();
+        var gptAssistant = AiServices.builder(ChatAssistant.class).chatLanguageModel(gpt).build();
+
         var prompt = new PrompData(spec.data_source(),
                 spec.prioritize_performance() ? MigrationPreferences.PREFER_PERFORMANCE : MigrationPreferences.PREFER_CONSISTENCY,
+                spec.allow_ref(),
                 Framework.valueOf(spec.framework()),
-                spec.workload().stream().map(o -> new Query(o.query())).toList());
+                spec.workload().stream().map(o -> new Query(o.query())).toList(),
+                spec.custom_prompt()
+                );
         var result = gptAssistant.chat(prompt.get());
-        return new MfResponse(result.content().text(), result.tokenUsage().totalTokenCount(), new Date());
-    }
-
-    public Response<AiMessage> Generate(String prompt) {
-        return gptAssistant.chat(prompt);
+        return new MfResponse(result.content().text(), result.tokenUsage().totalTokenCount(), prompt.get(), new Date());
     }
 
 

@@ -9,7 +9,7 @@ public record SpecificationDTO(
         Boolean allow_ref,
         Boolean prioritize_performance,
         String framework,
-        String custom_prompt,
+        List<String> custom_prompt,
         String LLM
 ) {
     public record Workload(Integer regularity, String query) {}
