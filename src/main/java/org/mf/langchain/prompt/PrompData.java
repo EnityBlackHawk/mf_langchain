@@ -58,7 +58,7 @@ public class PrompData implements Iterator<String> {
 
         String q = "";
         for(var x : queryList) {
-            q = q.concat(x.query() + "\n");
+            q = q.concat(x.query() + (x.regularity() != null ? "\n" + "- This query is used " + x.regularity() + "% of the time\n" : ""));
         }
         return Pair.of(s, q);
     }
@@ -77,9 +77,10 @@ public class PrompData implements Iterator<String> {
                  (allowReferences ? "- Can use references when necessary \n" : "- Do not use references, only use embedded the documents \n") +
                 "- " + migrationPreference.getDescription() + "\n";
 
-         for(var x : customPrompts) {
-             result = result.concat("- " + x + "\n");
-         }
+         if(customPrompts != null)
+             for(var x : customPrompts) {
+                 result = result.concat("- " + x + "\n");
+             }
          return result;
     }
 

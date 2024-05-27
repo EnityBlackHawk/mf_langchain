@@ -12,8 +12,6 @@ import org.mf.langchain.prompt.Framework;
 import org.mf.langchain.prompt.MigrationPreferences;
 import org.mf.langchain.prompt.PrompData;
 import org.mf.langchain.prompt.Query;
-import org.mf.langchain.repositories.AirlineRepository;
-import org.mf.langchain.repositories.AirportRepository;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
