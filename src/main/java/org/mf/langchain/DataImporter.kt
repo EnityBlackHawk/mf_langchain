@@ -1,17 +1,11 @@
 package org.mf.langchain
 
-import com.google.gson.Gson
-import org.mf.langchain.DTO.AirportJson
-import java.io.File
-import java.util.*
-import kotlin.collections.ArrayList
-import com.google.gson.reflect.TypeToken;
-import org.mf.langchain.DTO.AirlineJson
 import org.springframework.core.io.PathResource
 import org.springframework.core.io.support.EncodedResource
 import org.springframework.jdbc.datasource.init.ScriptUtils
 import java.sql.Connection
-import kotlin.io.path.Path
+import java.sql.ResultSet
+import java.sql.SQLException
 
 class DataImporter {
 
@@ -59,7 +53,7 @@ class DataImporter {
 //           }
 //           return airportJson[0].iata_code
 //        }
-        fun runSQL(path : String, connection : Connection) {
+        fun runSQLFromFile(path : String, connection : Connection) {
             ScriptUtils.executeSqlScript(
                 connection,
                 EncodedResource(PathResource(path)),
@@ -70,6 +64,49 @@ class DataImporter {
                 ScriptUtils.DEFAULT_BLOCK_COMMENT_START_DELIMITER,
                 ScriptUtils.DEFAULT_BLOCK_COMMENT_END_DELIMITER
             );
+        }
+
+        fun runSQL(sql : String, connection : Connection) : String {
+            var result: String;
+            try {
+                connection.createStatement().use { statement ->
+                    val hasRS = statement.execute(sql)
+                    result = if (hasRS) resResultSet(statement.resultSet) else "OK"
+                    statement.close()
+                }
+            } catch (e : SQLException){
+                return e.message.toString()
+            }
+            return result
+        }
+
+        fun createDatabase(connection : Connection, databaseName : String) : String {
+            return runSQL("CREATE DATABASE $databaseName", connection)
+        }
+
+        private fun resResultSet(rs : ResultSet) : String {
+            val sb = StringBuilder()
+            val md = rs.metaData
+            val columns = md.columnCount
+            val ss = mutableListOf<String>()
+            for (i in 1..columns) {
+                ss.add(md.getColumnName(i))
+            }
+
+            var formatString = ""
+            for(i in 1 .. columns)
+                formatString += "%15s "
+            formatString += "\n"
+
+            sb.append(String.format(formatString, *ss.toTypedArray()))
+            while (rs.next()) {
+                val row = mutableListOf<String>()
+                for (i in 1..columns) {
+                    row.add(rs.getString(i))
+                }
+                sb.append(String.format(formatString, *row.toTypedArray()))
+            }
+            return sb.toString()
         }
     }
 
