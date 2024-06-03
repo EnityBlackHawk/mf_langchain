@@ -46,6 +46,7 @@ public class LLMService {
                 spec.workload().stream().map(Query::new).toList(),
                 spec.custom_prompt()
                 );
+        System.out.println(prompt.get());
         var result = gptAssistant.chat(prompt.get());
         persistenceService.persist(
                 new TestResultDTO(

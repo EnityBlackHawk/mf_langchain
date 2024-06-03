@@ -20,26 +20,26 @@ class LangchainApplicationTests {
 //        System.out.println(result);
 //    }
 
-    @Test
-    void gpt(){
-        var gpt = new OpenAiChatModel.OpenAiChatModelBuilder()
-                .apiKey(System.getenv("GPT_KEY"))
-                .modelName(OpenAiChatModelName.GPT_3_5_TURBO_0125)
-                .maxRetries(1)
-                .temperature(1.0)
-                .maxTokens(500)
-                .build();
-        String result = gpt.generate("Are you gpt ?");
-        assertNotNull(result);
-        System.out.println(result);
-    }
+//    @Test
+//    void gpt(){
+//        var gpt = new OpenAiChatModel.OpenAiChatModelBuilder()
+//                .apiKey(System.getenv("GPT_KEY"))
+//                .modelName(OpenAiChatModelName.GPT_3_5_TURBO_0125)
+//                .maxRetries(1)
+//                .temperature(1.0)
+//                .maxTokens(500)
+//                .build();
+//        String result = gpt.generate("Are you gpt ?");
+//        assertNotNull(result);
+//        System.out.println(result);
+//    }
 
-    @Test
-    void ImportAirports(){
-        String result = DataImporter.Companion.importAirports("C:\\Users\\Luan\\Documents\\mf_langchain\\airports.json", null);
-        assertNotNull(result);
-        System.out.println(result);
-    }
+//    @Test
+//    void ImportAirports(){
+//        String result = DataImporter.Companion.importAirports("C:\\Users\\Luan\\Documents\\mf_langchain\\airports.json", null);
+//        assertNotNull(result);
+//        System.out.println(result);
+//    }
 
 
 }

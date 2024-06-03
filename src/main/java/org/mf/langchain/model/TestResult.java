@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 import org.mf.langchain.DTO.SpecificationDTO;
 
+import java.util.Date;
 import java.util.Objects;
 
 @Entity
@@ -19,19 +20,22 @@ public class TestResult {
     @Column(columnDefinition = "TEXT")
     private String response;
     private Integer tokenCount;
+    private Date date;
 
     public TestResult(
             Integer id,
             String request,
             Specification spec,
             String response,
-            Integer tokenCount
+            Integer tokenCount,
+            Date date
     ) {
         this.id = id;
         this.request = request;
         this.spec = spec;
         this.response = response;
         this.tokenCount = tokenCount;
+        this.date = date;
     }
 
     public TestResult() {
@@ -75,6 +79,14 @@ public class TestResult {
 
     public void setTokenCount(Integer tokenCount) {
         this.tokenCount = tokenCount;
+    }
+
+    public Date getDate() {
+        return date;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
     }
 
     @Override

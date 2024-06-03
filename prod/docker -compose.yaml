@@ -11,7 +11,6 @@ services:
     ports:
       - "5432:5432"
   mf_server:
-    build: .
     image: entityblackhawk/mf-server:latest
     environment:
       - GPT_KEY=${GPT_KEY}

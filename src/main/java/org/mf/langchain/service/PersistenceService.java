@@ -2,6 +2,7 @@ package org.mf.langchain.service;
 
 import org.mf.langchain.DTO.SpecificationDTO;
 import org.mf.langchain.DTO.TestResultDTO;
+import org.mf.langchain.exception.IdNotFoundException;
 import org.mf.langchain.model.Specification;
 import org.mf.langchain.model.TestResult;
 import org.mf.langchain.model.Workload;
@@ -11,6 +12,7 @@ import org.mf.langchain.repositories.WorkloadRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.sql.Date;
 import java.util.List;
 
 @Service
@@ -35,7 +37,8 @@ public class PersistenceService {
                 testResultdto.request(),
                 this.persist(testResultdto.spec()),
                 testResultdto.response(),
-                testResultdto.tokenCount()
+                testResultdto.tokenCount(),
+                new Date(System.currentTimeMillis())
         );
         return testResultRepository.save(testResult);
     }
@@ -66,6 +69,10 @@ public class PersistenceService {
 
     public List<TestResult> getTestResults() {
         return testResultRepository.findAll();
+    }
+
+    public String getTestResultResponse(Integer id) {
+        return testResultRepository.findById(id).orElseThrow(() -> new IdNotFoundException(id)).getResponse();
     }
 
 }

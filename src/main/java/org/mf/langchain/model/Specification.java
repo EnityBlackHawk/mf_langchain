@@ -5,6 +5,7 @@ import org.hibernate.annotations.Type;
 import org.mf.langchain.DTO.SpecificationDTO;
 import org.mf.langchain.model.Workload;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -115,8 +116,10 @@ public class Specification {
         this.framework = framework;
     }
 
-    public String getCustom_prompt() {
-        return custom_prompt;
+    public List<String> getCustom_prompt() {
+        if(custom_prompt == null || custom_prompt.isEmpty())
+            return List.of();
+        return Arrays.stream(custom_prompt.split("\\|")).toList();
     }
 
     public void setCustom_prompt(String custom_prompt) {
