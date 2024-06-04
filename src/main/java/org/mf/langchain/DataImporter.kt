@@ -95,12 +95,12 @@ class DataImporter {
 
             var formatString = ""
             for(i in 1 .. columns)
-                formatString += "%15s "
+                formatString += ("%${ss[i - 1].length}s" + if (i == columns) "" else " | ")
             formatString += "\n"
 
             sb.append(String.format(formatString, *ss.toTypedArray()))
             while (rs.next()) {
-                val row = mutableListOf<String>()
+                val row = mutableListOf<String?>()
                 for (i in 1..columns) {
                     row.add(rs.getString(i))
                 }
