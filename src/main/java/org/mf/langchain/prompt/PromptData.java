@@ -4,30 +4,31 @@ import lombok.Data;
 import org.mf.langchain.metadata.DbMetadata;
 import org.springframework.data.util.Pair;
 
-import java.awt.*;
 import java.util.Iterator;
 import java.util.List;
 
 @Data
-public class PrompData implements Iterator<String> {
+public class PromptData implements Iterator<String> {
 
-    private List<Query> queryList;
-    private MigrationPreferences migrationPreference;
-    private DbMetadata dbMetadata;
-    private Framework framework;
+    protected List<Query> queryList;
+    protected MigrationPreferences migrationPreference;
+    protected DbMetadata dbMetadata;
+    protected Framework framework;
     private int callCount = 0;
-    private String sqlTables;
-    private boolean allowReferences;
-    private List<String> customPrompts;
+    protected String sqlTables;
+    protected boolean allowReferences;
+    protected List<String> customPrompts; //aka remarks
 
-    public PrompData(DbMetadata dbMetadata, MigrationPreferences migrationPreference, Boolean allowReferences, Framework framework, List<Query> queryList) {
+    public PromptData(DbMetadata dbMetadata, MigrationPreferences migrationPreference, Boolean allowReferences, Framework framework, List<Query> queryList, List<String> customPrompts) {
         this.queryList = queryList;
         this.migrationPreference = migrationPreference;
         this.dbMetadata = dbMetadata;
         this.framework = framework;
+        this.customPrompts = customPrompts;
+        populateRemarks();
     }
 
-    public PrompData(String sqlTables, MigrationPreferences migrationPreference, Boolean allowReferences, Framework framework, List<Query> queryList, List<String> customPrompts) {
+    public PromptData(String sqlTables, MigrationPreferences migrationPreference, Boolean allowReferences, Framework framework, List<Query> queryList, List<String> customPrompts) {
         this.queryList = queryList;
         this.migrationPreference = migrationPreference;
         this.framework = framework;
@@ -35,6 +36,16 @@ public class PrompData implements Iterator<String> {
         this.dbMetadata = null;
         this.allowReferences = allowReferences;
         this.customPrompts = customPrompts;
+        populateRemarks();
+    }
+
+    protected void populateRemarks(){
+        if(customPrompts == null)
+            customPrompts = new java.util.ArrayList<>();
+        customPrompts.add("Use Lombok");
+        customPrompts.add("Optimized for "+ framework.getFramework() +" framework");
+        customPrompts.add(allowReferences ? "You can use references when necessary" : "Do not use references, only use embedded the documents");
+        customPrompts.add(migrationPreference.getDescription());
     }
 
     public Query getQuery(int index) {
@@ -71,11 +82,7 @@ public class PrompData implements Iterator<String> {
 
          var result =  "Suggest a MongoDB structure for this relational database: \n" + s + "\n" +
                  (!q.isEmpty() ? "- Please consider a structure that are optimized for this queries: \n" + q : "") +
-                 "\n" + "- Please consider a structure that: \n" +
-                "- Use Lombok \n" +
-                "- Optimized for "+ framework.getFramework() +" framework \n" +
-                 (allowReferences ? "- Can use references when necessary \n" : "- Do not use references, only use embedded the documents \n") +
-                "- " + migrationPreference.getDescription() + "\n";
+                 "\n" + "- Please consider a structure that: \n";
 
          if(customPrompts != null)
              for(var x : customPrompts) {

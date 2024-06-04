@@ -75,4 +75,8 @@ public class PersistenceService {
         return testResultRepository.findById(id).orElseThrow(() -> new IdNotFoundException(id)).getResponse();
     }
 
+    public String getTestResultRequest(Integer id) {
+        return testResultRepository.findById(id).orElseThrow(() -> new IdNotFoundException(id)).getRequest();
+    }
+
 }

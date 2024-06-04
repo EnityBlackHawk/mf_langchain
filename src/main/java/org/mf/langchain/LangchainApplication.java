@@ -1,17 +1,5 @@
 package org.mf.langchain;
 
-import dev.langchain4j.memory.ChatMemory;
-import dev.langchain4j.memory.chat.MessageWindowChatMemory;
-import dev.langchain4j.model.openai.OpenAiChatModel;
-import dev.langchain4j.model.openai.OpenAiChatModelName;
-import dev.langchain4j.service.AiServices;
-import org.mf.langchain.gemini.GeminiChatLanguageModel;
-import org.mf.langchain.gemini.GeminiHttpClient;
-import org.mf.langchain.metadata.DbMetadata;
-import org.mf.langchain.prompt.Framework;
-import org.mf.langchain.prompt.MigrationPreferences;
-import org.mf.langchain.prompt.PrompData;
-import org.mf.langchain.prompt.Query;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
