@@ -93,21 +93,44 @@ class DataImporter {
                 ss.add(md.getColumnName(i))
             }
 
-            var formatString = ""
-            for(i in 1 .. columns)
-                formatString += ("%${ss[i - 1].length}s" + if (i == columns) "" else " | ")
-            formatString += "\n"
+            val values = mutableMapOf<String, MutableList<String>>()
 
-            sb.append(String.format(formatString, *ss.toTypedArray()))
             while (rs.next()) {
                 val row = mutableListOf<String?>()
                 for (i in 1..columns) {
                     row.add(rs.getString(i))
                 }
+                ss.forEachIndexed {index, it ->
+                    if(values[it] == null) values[it] = mutableListOf()
+                    values[it]!!.add(row[index] ?: "NULL")
+                }
+
+                // sb.append(String.format(formatString, *row.toTypedArray()))
+            }
+
+            var formatString = ""
+            for (i in 1..columns)
+                formatString += ("%${
+                    (values[ss[i - 1]]!!.maxByOrNull { it: String -> it.length }?.length ?: 0).coerceAtLeast(
+                        ss[i - 1].length
+                    )
+                }s" + if (i == columns) "" else " | ")
+            formatString += "\n"
+
+            sb.append(String.format(formatString, *ss.toTypedArray()))
+            val rowSize = values[ss[0]]!!.size
+            for (i in 0 until rowSize) {
+                val row = mutableListOf<String?>()
+                for (j in 0 until columns) {
+                    row.add(values[ss[j]]!![i])
+                }
                 sb.append(String.format(formatString, *row.toTypedArray()))
             }
+
             return sb.toString()
         }
+
+
     }
 
 
