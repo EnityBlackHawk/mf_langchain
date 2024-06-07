@@ -149,7 +149,7 @@ public class DbMetadata {
 
     public boolean isConnected() {
         try {
-            return _connection != null && _connection.isClosed();
+            return _connection != null && !_connection.isClosed();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

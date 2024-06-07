@@ -2,14 +2,18 @@ package org.mf.langchain.service;
 
 import dev.langchain4j.model.openai.OpenAiChatModel;
 import dev.langchain4j.service.AiServices;
+import org.jetbrains.annotations.NotNull;
 import org.mf.langchain.ChatAssistant;
 import org.mf.langchain.DTO.MfResponse;
 import org.mf.langchain.DTO.SpecificationDTO;
 import org.mf.langchain.DTO.TestResultDTO;
+import org.mf.langchain.exception.DBConnectionException;
+import org.mf.langchain.metadata.DbMetadata;
 import org.mf.langchain.prompt.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.sql.SQLException;
 import java.util.Date;
 
 @Service
@@ -23,6 +27,8 @@ public class LLMService {
 
     public MfResponse Generate(SpecificationDTO spec) {
 
+        String data = getData(spec);
+
         var gpt = new OpenAiChatModel.OpenAiChatModelBuilder()
                 .apiKey(System.getenv("GPT_KEY"))
                 .modelName(spec.LLM())
@@ -32,7 +38,7 @@ public class LLMService {
         var gptAssistant = AiServices.builder(ChatAssistant.class).chatLanguageModel(gpt).build();
 
         var prompt = new PromptData2(
-                        spec.data_source(),
+                        data,
                         spec.prioritize_performance() ? MigrationPreferences.PREFER_PERFORMANCE : MigrationPreferences.PREFER_CONSISTENCY,
                         spec.allow_ref(),
                         Framework.valueOf(spec.framework()),
@@ -45,7 +51,7 @@ public class LLMService {
         persistenceService.persist(
                 new TestResultDTO(
                         prompt.get(),
-                        spec,
+                        SpecificationDTO.overrideDataSource(spec, data),
                         result.content().text(),
                         result.tokenUsage().totalTokenCount()
                 )
@@ -53,5 +59,35 @@ public class LLMService {
         return new MfResponse(result.content().text(), result.tokenUsage().totalTokenCount(), prompt.get(), new Date());
     }
 
+    private @NotNull String getData(SpecificationDTO spec) {
+        String data = "";
 
+        if(spec.data_source() == null) {
+            
+            if(spec.credentials() == null)
+                throw new RuntimeException("Credentials are required when not proving data source");
+            
+            if(spec.credentials().connectionString() == null) 
+                throw new RuntimeException("credentials.connectionString is required when not proving data source");
+            
+            var cred = spec.credentials();
+            var user = cred.username() != null ? cred.username() : "admin";
+            var passw = cred.password() != null ? cred.password() : "admin";
+            try {
+                var mdb = new DbMetadata(
+                        spec.credentials().connectionString(),
+                        user,
+                        passw,
+                        null);
+
+                if(!mdb.isConnected())
+                    throw new DBConnectionException();
+                data = mdb.toString();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        else data = spec.data_source();
+        return data;
+    }
 }
