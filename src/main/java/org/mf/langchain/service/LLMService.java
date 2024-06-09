@@ -12,6 +12,7 @@ import org.mf.langchain.DataImporter;
 import org.mf.langchain.exception.DBConnectionException;
 import org.mf.langchain.metadata.DbMetadata;
 import org.mf.langchain.prompt.*;
+import org.mf.langchain.util.QueryResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
@@ -95,6 +96,7 @@ public class LLMService {
         }
         else {
             data = spec.data_source();
+            card = new QueryResult(spec.cardinality(), "Table name", "Cardinality").asString();
         }
         return Pair.of(data, card);
     }

@@ -1,6 +1,7 @@
 package org.mf.langchain.DTO;
 
 import java.util.List;
+import java.util.Map;
 
 public record SpecificationDTO(
         String name,
@@ -11,7 +12,8 @@ public record SpecificationDTO(
         String framework,
         List<String> custom_prompt,
         String LLM,
-        Credentials credentials
+        Credentials credentials,
+        Map<String, Integer> cardinality
 ) {
     public record WorkloadDTO(Integer regularity, String query) {}
 
@@ -25,7 +27,8 @@ public record SpecificationDTO(
                 spec.framework(),
                 spec.custom_prompt(),
                 spec.LLM(),
-                spec.credentials()
+                spec.credentials(),
+                spec.cardinality()
         );
     }
 }

@@ -6,6 +6,8 @@ import org.mf.langchain.service.TDatabaseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+
 @RestController
 @RequestMapping("/temp")
 public class TDatabaseController {

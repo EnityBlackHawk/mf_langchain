@@ -1,5 +1,6 @@
 package org.mf.langchain
 
+import org.mf.langchain.util.QueryResult
 import org.springframework.core.io.PathResource
 import org.springframework.core.io.support.EncodedResource
 import org.springframework.jdbc.datasource.init.ScriptUtils
@@ -71,7 +72,7 @@ class DataImporter {
             try {
                 connection.createStatement().use { statement ->
                     val hasRS = statement.execute(sql)
-                    result = if (hasRS) resResultSet(statement.resultSet) else "OK"
+                    result = if (hasRS) QueryResult(statement.resultSet).asString() else "OK"
                     statement.close()
                 }
             } catch (e : SQLException){
