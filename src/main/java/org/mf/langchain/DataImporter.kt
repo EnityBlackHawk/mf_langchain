@@ -130,6 +130,20 @@ class DataImporter {
             return sb.toString()
         }
 
+        fun getCardinality(connection: Connection) : String {
+            runSQL("ANALYZE", connection)
+            return runSQL("SELECT \n" +
+                    "    relname AS table_name, \n" +
+                    "    reltuples AS row_count\n" +
+                    "FROM \n" +
+                    "    pg_class C\n" +
+                    "JOIN \n" +
+                    "    pg_namespace N ON (N.oid = C.relnamespace)\n" +
+                    "WHERE \n" +
+                    "    nspname NOT IN ('pg_catalog', 'information_schema') \n" +
+                    "    AND C.relkind = 'r';", connection)
+        }
+
 
     }
 

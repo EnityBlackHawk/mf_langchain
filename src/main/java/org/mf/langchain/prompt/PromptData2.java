@@ -1,5 +1,6 @@
 package org.mf.langchain.prompt;
 
+import org.jetbrains.annotations.Nullable;
 import org.mf.langchain.metadata.DbMetadata;
 import org.springframework.data.util.Pair;
 
@@ -7,16 +8,19 @@ import java.util.List;
 
 public class PromptData2 extends PromptData {
 
-    private Boolean useMarkdown;
+    private final Boolean useMarkdown;
+    private final String cardinalityTable;
 
-    public PromptData2(DbMetadata dbMetadata, MigrationPreferences migrationPreference, Boolean allowReferences, Framework framework, Boolean useMarkdown, List<Query> queryList, List<String> remarks) {
+    public PromptData2(DbMetadata dbMetadata, MigrationPreferences migrationPreference, Boolean allowReferences, Framework framework, @Nullable String cardinalityTable, Boolean useMarkdown, List<Query> queryList, List<String> remarks) {
         super(dbMetadata, migrationPreference, allowReferences, framework, queryList, remarks);
         this.useMarkdown = useMarkdown;
+        this.cardinalityTable = cardinalityTable;
     }
 
-    public PromptData2(String sqlTables, MigrationPreferences migrationPreference, Boolean allowReferences, Framework framework, List<Query> queryList, Boolean useMarkdown, List<String> customPrompts) {
+    public PromptData2(String sqlTables, MigrationPreferences migrationPreference, Boolean allowReferences, Framework framework, @Nullable String cardinalityTable, Boolean useMarkdown, List<Query> queryList, List<String> customPrompts) {
         super(sqlTables, migrationPreference, allowReferences, framework, queryList, customPrompts);
         this.useMarkdown = useMarkdown;
+        this.cardinalityTable = cardinalityTable;
     }
 
     @Override
@@ -34,6 +38,12 @@ public class PromptData2 extends PromptData {
             sb.append("## Take into consideration this most used queries: \n");
             sb.append(infos.getSecond());
         }
+        if(cardinalityTable != null)
+        {
+            sb.append("## Cardinality Table: \n");
+            sb.append(cardinalityTable);
+        }
+
         sb.append("## Remarks: \n");
         for (var x : customPrompts) {
             sb.append("- ").append(x).append("\n");
@@ -43,7 +53,7 @@ public class PromptData2 extends PromptData {
     }
 
     private String removeMarkdown(String s) {
-        return s.replaceAll("('''|'|-|##|#)", "");
+        return s.replaceAll("(```sql|```|'|-|##|#)", "");
     }
 
     @Override

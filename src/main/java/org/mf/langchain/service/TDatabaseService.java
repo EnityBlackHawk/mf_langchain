@@ -66,7 +66,6 @@ public class TDatabaseService {
         var conn = connections.getOrDefault(databaseName, null);
         if(conn == null) throw new RuntimeException("Database not found");
         return DataImporter.Companion.runSQL(sql, conn);
-
     }
 
     public String getCreateSQL(String databaseName) {

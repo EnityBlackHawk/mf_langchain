@@ -3,14 +3,17 @@ package org.mf.langchain.service;
 import dev.langchain4j.model.openai.OpenAiChatModel;
 import dev.langchain4j.service.AiServices;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.mf.langchain.ChatAssistant;
 import org.mf.langchain.DTO.MfResponse;
 import org.mf.langchain.DTO.SpecificationDTO;
 import org.mf.langchain.DTO.TestResultDTO;
+import org.mf.langchain.DataImporter;
 import org.mf.langchain.exception.DBConnectionException;
 import org.mf.langchain.metadata.DbMetadata;
 import org.mf.langchain.prompt.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 
 import java.sql.SQLException;
@@ -27,7 +30,7 @@ public class LLMService {
 
     public MfResponse Generate(SpecificationDTO spec) {
 
-        String data = getData(spec);
+        var data = getData(spec);
 
         var gpt = new OpenAiChatModel.OpenAiChatModelBuilder()
                 .apiKey(System.getenv("GPT_KEY"))
@@ -38,12 +41,13 @@ public class LLMService {
         var gptAssistant = AiServices.builder(ChatAssistant.class).chatLanguageModel(gpt).build();
 
         var prompt = new PromptData2(
-                        data,
+                        data.getFirst(),
                         spec.prioritize_performance() ? MigrationPreferences.PREFER_PERFORMANCE : MigrationPreferences.PREFER_CONSISTENCY,
                         spec.allow_ref(),
                         Framework.valueOf(spec.framework()),
+                        data.getSecond(),
+                        true,
                         spec.workload().stream().map(Query::new).toList(),
-                true,
                         spec.custom_prompt()
                         );
         System.out.println(prompt.get());
@@ -51,7 +55,7 @@ public class LLMService {
         persistenceService.persist(
                 new TestResultDTO(
                         prompt.get(),
-                        SpecificationDTO.overrideDataSource(spec, data),
+                        SpecificationDTO.overrideDataSource(spec, data.getFirst()),
                         result.content().text(),
                         result.tokenUsage().totalTokenCount()
                 )
@@ -59,8 +63,9 @@ public class LLMService {
         return new MfResponse(result.content().text(), result.tokenUsage().totalTokenCount(), prompt.get(), new Date());
     }
 
-    private @NotNull String getData(SpecificationDTO spec) {
+    private Pair<String, String> getData(SpecificationDTO spec) {
         String data = "";
+        String card = null;
 
         if(spec.data_source() == null) {
             
@@ -83,11 +88,14 @@ public class LLMService {
                 if(!mdb.isConnected())
                     throw new DBConnectionException();
                 data = mdb.toString();
+                card = DataImporter.Companion.getCardinality(mdb.getConnection());
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
         }
-        else data = spec.data_source();
-        return data;
+        else {
+            data = spec.data_source();
+        }
+        return Pair.of(data, card);
     }
 }
