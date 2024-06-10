@@ -7,7 +7,10 @@ import org.mf.langchain.model.Workload;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+
+import io.hypersistence.utils.hibernate.type.json.JsonBinaryType;
 
 @Entity
 public class Specification {
@@ -25,6 +28,9 @@ public class Specification {
     private String framework;
     private String custom_prompt;
     private String LLM;
+    @Column(columnDefinition = "jsonb")
+    @Type(value = JsonBinaryType.class)
+    private Map<String, Integer> cardinality;
 
     public Specification(
             Integer id,
@@ -35,7 +41,8 @@ public class Specification {
             Boolean prioritize_performance,
             String framework,
             List<String> custom_prompt,
-            String LLM
+            String LLM,
+            Map<String, Integer> cardinality
     ) {
         StringBuilder cp = new StringBuilder();
         if(custom_prompt != null)
@@ -52,10 +59,11 @@ public class Specification {
         this.framework = framework;
         this.custom_prompt = cp.toString();
         this.LLM = LLM;
+        this.cardinality = cardinality;
     }
 
     public Specification(SpecificationDTO dto) {
-        this(null, dto.name(), dto.data_source(), dto.workload().stream().map(Workload::new).toList(), dto.allow_ref(), dto.prioritize_performance(), dto.framework(), dto.custom_prompt(), dto.LLM());
+        this(null, dto.name(), dto.data_source(), dto.workload().stream().map(Workload::new).toList(), dto.allow_ref(), dto.prioritize_performance(), dto.framework(), dto.custom_prompt(), dto.LLM(), dto.cardinality());
     }
 
     public Specification() {}
@@ -132,6 +140,14 @@ public class Specification {
 
     public void setLLM(String LLM) {
         this.LLM = LLM;
+    }
+
+    public Map<String, Integer> getCardinality() {
+        return cardinality;
+    }
+
+    public void setCardinality(Map<String, Integer> cardinality) {
+        this.cardinality = cardinality;
     }
 
     @Override

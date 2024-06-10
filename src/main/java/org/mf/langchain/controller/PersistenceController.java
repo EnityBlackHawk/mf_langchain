@@ -38,4 +38,8 @@ public class PersistenceController {
         return persistenceService.getTestResultRequest(id);
     }
 
+    @GetMapping("/{id}")
+    public TestResult getTestResult(@PathVariable Integer id) {
+        return persistenceService.getTestResult(id);
+    }
 }

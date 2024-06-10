@@ -54,7 +54,8 @@ public class PersistenceService {
                 specificationDto.prioritize_performance(),
                 specificationDto.framework(),
                 specificationDto.custom_prompt(),
-                specificationDto.LLM()
+                specificationDto.LLM(),
+                specificationDto.cardinality()
         );
         return specificationRepository.save(specification);
     }
@@ -70,6 +71,10 @@ public class PersistenceService {
 
     public List<TestResult> getTestResults() {
         return testResultRepository.findAll();
+    }
+
+    public TestResult getTestResult(Integer id) {
+        return testResultRepository.findById(id).orElseThrow(() -> new IdNotFoundException(id));
     }
 
     public String getTestResultResponse(Integer id) {
