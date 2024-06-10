@@ -32,22 +32,36 @@ public class PromptData2 extends PromptData {
         sb.append("# Suggest a MongoDB structure for this relational database: \n")
                 .append("```sql\n")
                 .append(infos.getFirst())
-                .append("\n```\n");
+                .append("```\n");
         if(!queryList.isEmpty())
         {
             sb.append("## Take into consideration this most used queries: \n");
             sb.append(infos.getSecond());
+            sb.append("\n");
         }
         if(cardinalityTable != null)
         {
             sb.append("## Cardinality Table: \n");
             sb.append(cardinalityTable);
+            sb.append("\n");
         }
 
-        sb.append("## Remarks: \n");
-        for (var x : customPrompts) {
-            sb.append("- ").append(x).append("\n");
+        if(!customPrompts.isEmpty()){
+            sb.append("## Modeling remarks: \n");
+            for (var x : customPrompts) {
+                sb.append("- ").append(x).append("\n");
+            }
+            sb.append("\n");
         }
+
+        if(!customCodePrompts.isEmpty()){
+            sb.append("## Generated code remarks: \n");
+            for(var x : customCodePrompts) {
+                sb.append("- ").append(x).append("\n");
+            }
+            sb.append("\n");
+        }
+
         var result = sb.toString();
         return useMarkdown ? result : removeMarkdown(result);
     }

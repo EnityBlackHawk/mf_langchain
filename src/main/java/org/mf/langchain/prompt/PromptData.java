@@ -18,6 +18,7 @@ public class PromptData implements Iterator<String> {
     protected String sqlTables;
     protected boolean allowReferences;
     protected List<String> customPrompts; //aka remarks
+    protected List<String> customCodePrompts;
 
     public PromptData(DbMetadata dbMetadata, MigrationPreferences migrationPreference, Boolean allowReferences, Framework framework, List<Query> queryList, List<String> customPrompts) {
         this.queryList = queryList;
@@ -42,8 +43,10 @@ public class PromptData implements Iterator<String> {
     protected void populateRemarks(){
         if(customPrompts == null)
             customPrompts = new java.util.ArrayList<>();
-        customPrompts.add("Use Lombok");
-        customPrompts.add("Optimized for "+ framework.getFramework() +" framework");
+        if(customCodePrompts == null)
+            customCodePrompts = new java.util.ArrayList<>();
+        customCodePrompts.add("Use Lombok");
+        customCodePrompts.add("Optimized for "+ framework.getFramework() +" framework");
         customPrompts.add(allowReferences ? "You can use references when necessary" : "Do not use references, only use embedded the documents");
         customPrompts.add(migrationPreference.getDescription());
     }
@@ -86,6 +89,10 @@ public class PromptData implements Iterator<String> {
 
          if(customPrompts != null)
              for(var x : customPrompts) {
+                 result = result.concat("- " + x + "\n");
+             }
+         if(customCodePrompts != null)
+             for(var x : customCodePrompts) {
                  result = result.concat("- " + x + "\n");
              }
          return result;

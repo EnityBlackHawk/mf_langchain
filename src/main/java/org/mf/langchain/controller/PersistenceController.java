@@ -28,12 +28,12 @@ public class PersistenceController {
         return persistenceService.persist(testResultDto);
     }
 
-    @GetMapping("/response/{id}")
+    @GetMapping("/{id}/response")
     public String get(@PathVariable Integer id) {
         return persistenceService.getTestResultResponse(id);
     }
 
-    @GetMapping("/request/{id}")
+    @GetMapping("/{id}/request")
     public String getRequest(@PathVariable Integer id) {
         return persistenceService.getTestResultRequest(id);
     }
