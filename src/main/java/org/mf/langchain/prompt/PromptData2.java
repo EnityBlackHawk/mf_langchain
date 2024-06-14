@@ -35,7 +35,7 @@ public class PromptData2 extends PromptData {
                 .append("```\n");
         if(!queryList.isEmpty())
         {
-            sb.append("## Take into consideration this most used queries: \n");
+            sb.append("## Consider these commonly used queries when modeling the MongoDB database: \n");
             sb.append(infos.getSecond());
             sb.append("\n");
         }
@@ -84,7 +84,7 @@ public class PromptData2 extends PromptData {
 
         String q = "";
         for(var x : queryList) {
-            q = q.concat("- " + (x.regularity() != null ? "\n" + "- **Used " + x.regularity() + "% of the time**: " : "") + "`" + x.query() + "`\n");
+            q = q.concat("- " + (x.regularity() != null ? "**Used " + x.regularity() + "% of the time**: " : "") + "`" + x.query() + "`\n");
         }
         return Pair.of(s, q);
     }

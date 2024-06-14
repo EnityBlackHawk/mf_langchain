@@ -4,6 +4,7 @@ import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.model.output.Response;
 import jakarta.servlet.http.HttpServletResponse;
 import org.mf.langchain.DTO.MfResponse;
+import org.mf.langchain.DTO.Relations;
 import org.mf.langchain.DTO.SpecificationDTO;
 import org.mf.langchain.service.LLMService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api")
@@ -28,6 +31,12 @@ public class MainController {
         response.addHeader("Total-Tokens", String.valueOf(result.tokens()));
         response.addHeader("Prompt", result.prompt());
         return result.aiResponse();
+    }
+
+    @PostMapping("/experimental/rels")
+    public List<Relations> getRelations(@RequestBody String text) {
+        var obj = service.getRelations(text);
+        return obj;
     }
 
 }
