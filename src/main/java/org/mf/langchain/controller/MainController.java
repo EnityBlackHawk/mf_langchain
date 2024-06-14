@@ -33,7 +33,7 @@ public class MainController {
         return result.aiResponse();
     }
 
-    @PostMapping("/experimental/rels")
+    @PostMapping("/expr/rels")
     public List<Relations> getRelations(@RequestBody String text) {
         var obj = service.getRelations(text);
         return obj;

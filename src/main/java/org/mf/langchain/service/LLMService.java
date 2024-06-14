@@ -77,11 +77,11 @@ public class LLMService {
                 .maxRetries(1)
                 .logRequests(true)
                 .logResponses(true)
-                .responseFormat("json_object")
+                //.responseFormat("json_object")
                 .temperature(0.5)
                 .build();
         var gptAssistant = AiServices.builder(ChatAssistant.class).chatLanguageModel(gpt).build();
-        var q = "Considering this database: \n" + text + " What are the relations between the tables? (Only many-to-one, many-to-many, one-to-one)";
+        var q = "Considering this database: \n" + text + " What are the relations between the tables? (Remove duplicates)";
         Type listType = new TypeToken<List<Relations>>() {}.getType();
         String response = gptAssistant.getRelations(q);
         Gson gson = new Gson();
