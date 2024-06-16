@@ -2,19 +2,18 @@ package org.mf.langchain.service;
 
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
+import dev.langchain4j.memory.chat.MessageWindowChatMemory;
 import dev.langchain4j.model.openai.OpenAiChatModel;
 import dev.langchain4j.model.openai.OpenAiChatModelName;
 import dev.langchain4j.service.AiServices;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.mf.langchain.ChatAssistant;
-import org.mf.langchain.DTO.MfResponse;
-import org.mf.langchain.DTO.Relations;
-import org.mf.langchain.DTO.SpecificationDTO;
-import org.mf.langchain.DTO.TestResultDTO;
+import org.mf.langchain.DTO.*;
 import org.mf.langchain.DataImporter;
 import org.mf.langchain.exception.DBConnectionException;
 import org.mf.langchain.metadata.DbMetadata;
+import org.mf.langchain.metadata.RelationsCardinality;
 import org.mf.langchain.prompt.*;
 import org.mf.langchain.util.QueryResult;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +21,9 @@ import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Type;
+import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -70,7 +71,31 @@ public class LLMService {
         return new MfResponse(result.content().text(), result.tokenUsage().totalTokenCount(), prompt.get(), new Date());
     }
 
-    public List<Relations> getRelations(String text) {
+    public List<Relations> getRelations(String text, @Nullable ChatAssistant gptAssistant) {
+        if(gptAssistant == null)
+        {
+            var gpt = new OpenAiChatModel.OpenAiChatModelBuilder()
+                    .apiKey(System.getenv("GPT_KEY"))
+                    .modelName(OpenAiChatModelName.GPT_3_5_TURBO)
+                    .maxRetries(1)
+                    .logRequests(true)
+                    .logResponses(true)
+                    //.responseFormat("json_object")
+                    .temperature(0.5)
+                    .build();
+            gptAssistant = AiServices.builder(ChatAssistant.class).chatLanguageModel(gpt).build();
+        }
+
+        var q = "Considering this database: \n" + text + " What are the relations between the tables? (Remove duplicates)";
+        Type listType = new TypeToken<List<Relations>>() {}.getType();
+        String response = gptAssistant.getRelations(q);
+        Gson gson = new Gson();
+        return gson.fromJson(response, listType);
+    }
+
+    public String getRelationsCardinality(String data, Connection connection) {
+
+        var chatMemory = MessageWindowChatMemory.withMaxMessages(10);
         var gpt = new OpenAiChatModel.OpenAiChatModelBuilder()
                 .apiKey(System.getenv("GPT_KEY"))
                 .modelName(OpenAiChatModelName.GPT_3_5_TURBO)
@@ -80,12 +105,12 @@ public class LLMService {
                 //.responseFormat("json_object")
                 .temperature(0.5)
                 .build();
-        var gptAssistant = AiServices.builder(ChatAssistant.class).chatLanguageModel(gpt).build();
-        var q = "Considering this database: \n" + text + " What are the relations between the tables? (Remove duplicates)";
-        Type listType = new TypeToken<List<Relations>>() {}.getType();
-        String response = gptAssistant.getRelations(q);
-        Gson gson = new Gson();
-        return gson.fromJson(response, listType);
+        var gptAssistant = AiServices.builder(ChatAssistant.class).chatLanguageModel(gpt).chatMemory(chatMemory).build();
+
+        var rels = getRelations(data, gptAssistant);
+        List<RelationsCardinality> rcd = List.of();
+
+        return gptAssistant.chatAsString("For each relationship: generate SQL queries to identify the max, min and avg number of relationships per id");
     }
 
     private Pair<String, String> getData(SpecificationDTO spec) {

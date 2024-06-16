@@ -81,6 +81,15 @@ class DataImporter {
             return result
         }
 
+        fun runQuery(sql : String, connection : Connection) : ResultSet {
+
+                connection.createStatement().use { statement ->
+                    val rs = statement.executeQuery(sql)
+                    statement.close()
+                    return rs
+                }
+        }
+
         fun createDatabase(connection : Connection, databaseName : String) : String {
             return runSQL("CREATE DATABASE $databaseName", connection)
         }
