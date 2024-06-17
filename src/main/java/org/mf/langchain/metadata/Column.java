@@ -10,6 +10,10 @@ public record Column(String name, SqlDataType dataType, Boolean isPk, @Nullable 
         return fkInfo != null;
     }
 
+    public boolean isPrimaryKey() {
+        return isPk;
+    }
+
     public record FkInfo(String columnName, String pk_tableName, String pk_name){
 
         public String toString_() {

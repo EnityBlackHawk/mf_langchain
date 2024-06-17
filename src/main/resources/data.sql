@@ -51,4 +51,4 @@ CREATE TABLE booking (
                          seat TEXT
 );
 
-SELECT p.first_name, p.passport_number, f.number FROM passenger AS p JOIN booking AS b on passenger.id = b.passenger JOIN flight AS f on b.flight = f.number; JOIN airport AS a on f.airport_to = a.id;
+-- SELECT p.first_name, p.passport_number, f.number FROM passenger AS p JOIN booking AS b on passenger.id = b.passenger JOIN flight AS f on b.flight = f.number; JOIN airport AS a on f.airport_to = a.id;

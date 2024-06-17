@@ -1,6 +1,7 @@
 package org.mf.langchain.service;
 
 import org.mf.langchain.DTO.CreateDatabaseDTO;
+import org.mf.langchain.DTO.Credentials;
 import org.mf.langchain.DTO.ResponseCreateDatabaseDTO;
 import org.mf.langchain.DataImporter;
 import org.mf.langchain.metadata.DbMetadata;
@@ -8,6 +9,7 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -50,6 +52,18 @@ public class TDatabaseService {
         }
     }
 
+    public Credentials getCredentials(String dbName) {
+        return new Credentials(baseConnectionString + "/" + dbName, username, password);
+    }
+
+    public Credentials createDatabase(String databaseName) throws SQLException {
+        var result = DataImporter.Companion.createDatabase(mainConnection, databaseName);
+        if(!result.equals("OK")) throw new RuntimeException(result);
+        var conn = DriverManager.getConnection(baseConnectionString + "/" + databaseName, username, password);
+        connections.put(databaseName, conn);
+        return new Credentials(baseConnectionString + "/" + databaseName, username, password);
+    }
+
     public ResponseCreateDatabaseDTO createDatabaseAndExecuteSQL(String databaseName, String sql) {
         DataImporter.Companion.createDatabase(mainConnection, databaseName);
         try {
@@ -78,6 +92,13 @@ public class TDatabaseService {
             throw new RuntimeException(e);
         }
         return metadata.toString();
+    }
+
+    @PostConstruct
+    public void createTestDatabase() throws SQLException {
+        var mdb = new DbMetadata(createDatabase("airport3"), null);
+        DataImporter.Companion.runSQLFromFile("src/main/resources/data.sql", mdb.getConnection());
+        DataImporter.Companion.runSQLFromFile("inserts.sql", mdb.getConnection());
     }
 
     @PreDestroy

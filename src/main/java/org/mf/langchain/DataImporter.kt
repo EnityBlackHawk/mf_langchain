@@ -81,12 +81,17 @@ class DataImporter {
             return result
         }
 
-        fun runQuery(sql : String, connection : Connection) : ResultSet {
+        fun <T> runQuery(sql : String, connection : Connection, output : Class<T>) : T {
 
                 connection.createStatement().use { statement ->
                     val rs = statement.executeQuery(sql)
+                    val res = when(output) {
+                        ResultSet::class.java -> rs as T
+                        QueryResult::class.java -> QueryResult(rs) as T
+                        else -> throw IllegalArgumentException("Unsupported output class")
+                    }
                     statement.close()
-                    return rs
+                    return res
                 }
         }
 

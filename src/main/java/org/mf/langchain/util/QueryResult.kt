@@ -2,6 +2,7 @@ package org.mf.langchain.util
 
 import java.sql.ResultSet
 import java.util.*
+import java.lang.Integer
 
 class QueryResult {
     private val columns = mutableListOf<String>()
@@ -34,6 +35,19 @@ class QueryResult {
         r.addAll(row.asList())
         rows.add(r)
         return this
+    }
+
+    fun <T> getAllFromColumn(columnName: String, outputClass : Class<T>): List<T> {
+        val columnIndex = columns.indexOf(columnName)
+        require(columnIndex != -1) { "Column $columnName not found" }
+        val strings = rows.map { it[columnIndex] }
+        return when(outputClass) {
+            Integer::class.java -> strings.map { it.toInt() } as List<T>
+            Long::class.java -> strings.map { it.toLong() } as List<T>
+            Float::class.java -> strings.map { it.toFloat() } as List<T>
+            Double::class.java -> strings.map { it.toDouble() } as List<T>
+            else -> strings as List<T>
+        }
     }
 
     fun asString() : String{

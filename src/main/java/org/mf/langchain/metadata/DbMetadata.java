@@ -3,6 +3,7 @@ package org.mf.langchain.metadata;
 import jakarta.persistence.EntityManager;
 import lombok.Getter;
 import org.jetbrains.annotations.Nullable;
+import org.mf.langchain.DTO.Credentials;
 import org.mf.langchain.util.SqlDataType;
 
 import java.sql.*;
@@ -76,6 +77,10 @@ public class DbMetadata {
                     )
             );
         }
+    }
+
+    public DbMetadata(Credentials credentials, @Nullable String tableNamePatter) throws SQLException {
+        this(credentials.connectionString(), credentials.username(), credentials.password(), tableNamePatter);
     }
 
     public DbMetadata(String connectionString, String username, String password, @Nullable String tableNamePatter) throws SQLException {

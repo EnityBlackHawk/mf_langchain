@@ -12,10 +12,13 @@ import org.mf.langchain.ChatAssistant;
 import org.mf.langchain.DTO.*;
 import org.mf.langchain.DataImporter;
 import org.mf.langchain.exception.DBConnectionException;
+import org.mf.langchain.metadata.Column;
 import org.mf.langchain.metadata.DbMetadata;
 import org.mf.langchain.metadata.RelationsCardinality;
+import org.mf.langchain.metadata.Table;
 import org.mf.langchain.prompt.*;
 import org.mf.langchain.util.QueryResult;
+import org.mf.langchain.util.TemplatedString;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
@@ -26,6 +29,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Stream;
 
 @Service
 public class LLMService {
@@ -93,24 +98,55 @@ public class LLMService {
         return gson.fromJson(response, listType);
     }
 
-    public String getRelationsCardinality(String data, Connection connection) {
+    public List<RelationsCardinality> getRelationsCardinality(DbMetadata metadata) {
 
-        var chatMemory = MessageWindowChatMemory.withMaxMessages(10);
-        var gpt = new OpenAiChatModel.OpenAiChatModelBuilder()
-                .apiKey(System.getenv("GPT_KEY"))
-                .modelName(OpenAiChatModelName.GPT_3_5_TURBO)
-                .maxRetries(1)
-                .logRequests(true)
-                .logResponses(true)
-                //.responseFormat("json_object")
-                .temperature(0.5)
-                .build();
-        var gptAssistant = AiServices.builder(ChatAssistant.class).chatLanguageModel(gpt).chatMemory(chatMemory).build();
+        var queries = new ArrayList<Pair<Relations, String>>();
 
-        var rels = getRelations(data, gptAssistant);
-        List<RelationsCardinality> rcd = List.of();
+        var rels = getRelations(metadata.toString(), null);
+        //var rels = List.of(new Relations("aircraft", "airline", "many-to-one"));
+        List<RelationsCardinality> rcd = new ArrayList<>();
 
-        return gptAssistant.chatAsString("For each relationship: generate SQL queries to identify the max, min and avg number of relationships per id");
+        var templateString = new TemplatedString(
+                        "SELECT {{target}}.{{target_pk}} AS id , " +
+                        "COUNT({{source}}.{{source_pk}}) AS number_of_{{source}} " +
+                        "FROM {{source}} " +
+                        "JOIN {{target}} ON {{source}}.{{prop}} = {{target}}.{{target_pk}} " +
+                        "GROUP BY {{target}}.{{target_pk}}"
+        );
+
+        for(var rel : rels) {
+
+            if(rel.cardinality.equals("one-to-many")) continue;
+
+            Table tSource = metadata.getTables().stream().filter((e) -> Objects.equals(e.name(), rel.table_source))
+                    .findFirst().orElseThrow(RuntimeException::new);
+            List<Column.FkInfo> props = tSource.columns().stream().filter((e) -> e.isFk() && Objects.equals(e.fkInfo().pk_tableName(), rel.table_target))
+                    .map(Column::fkInfo).toList();
+
+            if(props.isEmpty()) throw new RuntimeException("No foreign key found");
+
+            queries.addAll(
+                    props.stream().map((e) -> Pair.of(rel, templateString.render(
+                            Pair.of("source", rel.table_source),
+                            Pair.of("target", rel.table_target),
+                            Pair.of("target_pk", e.pk_name()),
+                            Pair.of("source_pk", tSource.getPrimaryKey().name()),
+                            Pair.of("prop", e.columnName()))
+                    )).toList()
+            );
+        }
+
+        for(var q : queries) {
+            var qResult =
+                    DataImporter.Companion.runQuery(q.getSecond(), metadata.getConnection(), QueryResult.class);
+            var values = qResult.getAllFromColumn("number_of_" + q.getFirst().table_source, Integer.class);
+            int min = values.stream().min(Integer::compareTo).orElseThrow(RuntimeException::new);
+            int max = values.stream().max(Integer::compareTo).orElseThrow(RuntimeException::new);
+            double avg = values.stream().mapToInt(Integer::intValue).average().orElseThrow();
+            rcd.add(new RelationsCardinality(q.getFirst(), min, max, avg));
+        }
+
+        return rcd;
     }
 
     private Pair<String, String> getData(SpecificationDTO spec) {

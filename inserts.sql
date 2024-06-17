@@ -1,38 +1,37 @@
--- INSERT statements for tb_manufacturer table
-INSERT INTO tb_manufacturer (id, name) VALUES
-(1, 'Boeing'),
-(2, 'Airbus'),
-(3, 'Bombardier'),
-(4, 'Embraer'),
-(5, 'Lockheed Martin'),
-(6, 'Northrop Grumman'),
-(7, 'Cessna'),
-(8, 'Dassault Aviation'),
-(9, 'Gulfstream Aerospace'),
-(10, 'Mitsubishi Aircraft');
+INSERT INTO airline (id, name)
+VALUES (1, 'Acme Airlines'),
+       (2, 'Budget Air'),
+       (3, 'International Skyways');
 
--- INSERT statements for 100 aircrafts
-INSERT INTO tb_aircraft (id, type, airline, manufacturer_id, registration, max_passengers) VALUES
-(1, 'TypeA', 1, 1, 'REG123', 200),
-(2, 'TypeB', 2, 2, 'REG124', 150),
-(3, 'TypeC', 3, 3, 'REG125', 220),
-(4, 'TypeD', 4, 4, 'REG126', 175),
-(5, 'TypeE', 5, 5, 'REG127', 210),
-(6, 'TypeZ', 5, 4, 'REG199', 150);
+INSERT INTO manufacturer (id, name)
+VALUES (1, 'Boeing'),
+       (2, 'Airbus'),
+       (3, 'Embraer');
 
+INSERT INTO airport (id, name, city, country)
+VALUES ('SDU', 'Santos Dumont Airport', 'Rio de Janeiro', 'Brazil'),
+       ('GRU', 'Guarulhos International Airport', 'São Paulo', 'Brazil'),
+       ('CDG', 'Charles de Gaulle Airport', 'Paris', 'France');
 
--- INSERT statements for 100 flights
-INSERT INTO tb_flight (number, airport_from, airport_to, departure_time_scheduled, departure_time_actual, arrival_time_scheduled, arrival_time_actual, gate, aircraft_id, connects_to) VALUES
-('FL100', 'JFK', 'LAX', '2024-04-21 10:00:00', '2024-04-21 10:05:00', '2024-04-21 14:00:00', '2024-04-21 14:10:00', 5, 1, NULL),
-('FL101', 'LAX', 'ORD', '2024-04-22 11:00:00', '2024-04-22 11:10:00', '2024-04-22 14:00:00', '2024-04-22 14:15:00', 3, 2, NULL),
-('FL102', 'ORD', 'DFW', '2024-04-23 12:00:00', '2024-04-23 12:05:00', '2024-04-23 15:00:00', '2024-04-23 15:10:00', 4, 3, NULL),
-('FL103', 'DFW', 'DEN', '2024-04-24 10:30:00', '2024-04-24 10:35:00', '2024-04-24 13:30:00', '2024-04-24 13:35:00', 6, 4, NULL),
-('FL104', 'DEN', 'ATL', '2024-04-25 09:00:00', '2024-04-25 09:10:00', '2024-04-25 12:00:00', '2024-04-25 12:10:00', 2, 5, NULL),
-('FL105', 'ATL', 'MIA', '2024-04-26 08:00:00', '2024-04-26 08:10:00', '2024-04-26 11:00:00', '2024-04-26 11:10:00', 1, 6, NULL),
-('FL106', 'MIA', 'JFK', '2024-04-27 07:00:00', '2024-04-27 07:10:00', '2024-04-27 10:00:00', '2024-04-27 10:10:00', 7, 1, NULL),
-('FL107', 'JFK', 'LAX', '2024-04-28 10:00:00', '2024-04-28 10:10:00', '2024-04-28 14:00:00', '2024-04-28 14:10:00', 5, 2, NULL),
-('FL108', 'LAX', 'ORD', '2024-04-29 11:00:00', '2024-04-29 11:10:00', '2024-04-29 14:00:00', '2024-04-29 14:10:00', 3, 3, NULL),
-('FL109', 'ORD', 'DFW', '2024-04-30 12:00:00', '2024-04-30 12:10:00', '2024-04-30 15:00:00', '2024-04-30 15:10:00', 4, 4, NULL),
-('FL110', 'DFW', 'DEN', '2024-05-01 10:30:00', '2024-05-01 10:40:00', '2024-05-01 13:30:00', '2024-05-01 13:40:00', 6, 5, NULL),
-('FL199', 'MIA', 'SFO', '2024-04-30 08:00:00', '2024-04-30 08:10:00', '2024-04-30 11:00:00', '2024-04-30 11:15:00', 7, 5, NULL);
+INSERT INTO aircraft (id, type, airline, manufacturer_id, registration, max_passengers)
+VALUES (1, '737-800', 1, 1, 'ACME123', 189),
+       (2, 'A320neo', 2, 2, 'BUDGET456', 180),
+       (3, 'E190-E2', 3, 1, 'ISKY789', 150);
 
+INSERT INTO passenger (id, first_name, last_name, passport_number)
+VALUES (1, 'Joana', 'Silva', 'BR123456789'),
+       (2, 'Miguel', 'Souza', 'BR987654321');
+
+-- Inserindo voos (exemplo com alguns voos)
+
+INSERT INTO flight (number, airport_from, airport_to, departure_time_scheduled, departure_time_actual, arrival_time_scheduled, arrival_time_actual, gate, aircraft, connects_to)
+VALUES ('AC123', 'SDU', 'GRU', '2024-06-03 10:00:00', NULL, '2024-06-03 10:30:00', NULL, 1, 1, NULL),
+       ('BA456', 'GRU', 'CDG', '2024-06-03 14:00:00', NULL, '2024-06-03 20:00:00', NULL, 2, 2, 'AC123'),
+       ('IS789', 'CDG', 'SDU', '2024-06-04 12:00:00', NULL, '2024-06-04 18:00:00', NULL, 3, 3, NULL);
+
+-- Inserindo reservas (exemplo com algumas reservas)
+
+INSERT INTO booking (id, flight, passenger, seat)
+VALUES (1, 'AC123', 1, '1A'),
+       (2, 'BA456', 2, '2B'),
+       (3, 'IS789', 1, '3C');
