@@ -1,12 +1,15 @@
 package org.mf.langchain.service;
 
 import org.jetbrains.annotations.Nullable;
+import org.mf.langchain.DTO.RelationsCardinalityDTO;
 import org.mf.langchain.DTO.SpecificationDTO;
 import org.mf.langchain.DTO.TestResultDTO;
 import org.mf.langchain.exception.IdNotFoundException;
+import org.mf.langchain.model.RelationsCardinality;
 import org.mf.langchain.model.Specification;
 import org.mf.langchain.model.TestResult;
 import org.mf.langchain.model.Workload;
+import org.mf.langchain.repositories.RelationsCardinalityRepository;
 import org.mf.langchain.repositories.SpecificationRepository;
 import org.mf.langchain.repositories.TestResultRepository;
 import org.mf.langchain.repositories.WorkloadRepository;
@@ -22,14 +25,17 @@ public class PersistenceService {
     private final SpecificationRepository specificationRepository;
     private final TestResultRepository testResultRepository;
     private final WorkloadRepository workloadRepository;
+    private final RelationsCardinalityRepository relationsCardinalityRepository;
 
 
     public PersistenceService(@Autowired SpecificationRepository specificationRepository,
                               @Autowired TestResultRepository testResultRepository,
-                              @Autowired WorkloadRepository workloadRepository) {
+                              @Autowired WorkloadRepository workloadRepository,
+                              @Autowired RelationsCardinalityRepository relationsCardinalityRepository){
         this.specificationRepository = specificationRepository;
         this.testResultRepository = testResultRepository;
         this.workloadRepository = workloadRepository;
+        this.relationsCardinalityRepository = relationsCardinalityRepository;
     }
 
     public TestResult persist(TestResultDTO testResultdto) {
@@ -55,7 +61,7 @@ public class PersistenceService {
                 specificationDto.framework(),
                 specificationDto.custom_prompt(),
                 specificationDto.LLM(),
-                specificationDto.cardinality()
+                specificationDto.cardinality().stream().map(this::persist).toList()
         );
         return specificationRepository.save(specification);
     }
@@ -67,6 +73,12 @@ public class PersistenceService {
                 workloadDto.query()
         );
         return workloadRepository.save(workload);
+    }
+
+    public RelationsCardinality persist(RelationsCardinalityDTO dto) {
+        var relationsCardinality = new RelationsCardinality(dto);
+        var r = relationsCardinalityRepository.save(relationsCardinality);
+        return r;
     }
 
     public List<TestResult> getTestResults() {

@@ -28,9 +28,8 @@ public class Specification {
     private String framework;
     private String custom_prompt;
     private String LLM;
-    @Column(columnDefinition = "jsonb")
-    @Type(value = JsonBinaryType.class)
-    private Map<String, Integer> cardinality;
+    @OneToMany
+    private List<RelationsCardinality> cardinality;
 
     public Specification(
             Integer id,
@@ -42,7 +41,7 @@ public class Specification {
             String framework,
             List<String> custom_prompt,
             String LLM,
-            Map<String, Integer> cardinality
+            List<RelationsCardinality> cardinality
     ) {
         StringBuilder cp = new StringBuilder();
         if(custom_prompt != null)
@@ -63,7 +62,16 @@ public class Specification {
     }
 
     public Specification(SpecificationDTO dto) {
-        this(null, dto.name(), dto.data_source(), dto.workload().stream().map(Workload::new).toList(), dto.allow_ref(), dto.prioritize_performance(), dto.framework(), dto.custom_prompt(), dto.LLM(), dto.cardinality());
+        this(null,
+                dto.name(),
+                dto.data_source(),
+                dto.workload().stream().map(Workload::new).toList(),
+                dto.allow_ref(),
+                dto.prioritize_performance(),
+                dto.framework(),
+                dto.custom_prompt(),
+                dto.LLM(),
+                dto.cardinality().stream().map(RelationsCardinality::new).toList());
     }
 
     public Specification() {}
@@ -142,11 +150,11 @@ public class Specification {
         this.LLM = LLM;
     }
 
-    public Map<String, Integer> getCardinality() {
+    public List<RelationsCardinality> getCardinality() {
         return cardinality;
     }
 
-    public void setCardinality(Map<String, Integer> cardinality) {
+    public void setCardinality(List<RelationsCardinality> cardinality) {
         this.cardinality = cardinality;
     }
 

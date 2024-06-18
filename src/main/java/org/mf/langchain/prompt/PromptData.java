@@ -18,6 +18,7 @@ public class PromptData implements Iterator<String> {
     protected String sqlTables;
     protected boolean allowReferences;
     protected List<String> customPrompts; //aka remarks
+    protected List<String> userDefinedPrompts;
     protected List<String> customCodePrompts;
 
     public PromptData(DbMetadata dbMetadata, MigrationPreferences migrationPreference, Boolean allowReferences, Framework framework, List<Query> queryList, List<String> customPrompts) {
@@ -25,7 +26,7 @@ public class PromptData implements Iterator<String> {
         this.migrationPreference = migrationPreference;
         this.dbMetadata = dbMetadata;
         this.framework = framework;
-        this.customPrompts = customPrompts;
+        this.userDefinedPrompts = customPrompts;
         populateRemarks();
     }
 
@@ -91,6 +92,12 @@ public class PromptData implements Iterator<String> {
              for(var x : customPrompts) {
                  result = result.concat("- " + x + "\n");
              }
+
+         if(userDefinedPrompts != null)
+             for(var x : userDefinedPrompts) {
+                 result = result.concat("- " + x + "\n");
+             }
+
          if(customCodePrompts != null)
              for(var x : customCodePrompts) {
                  result = result.concat("- " + x + "\n");

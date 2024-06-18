@@ -41,8 +41,9 @@ public class PromptData2 extends PromptData {
         }
         if(cardinalityTable != null)
         {
-            sb.append("## Cardinality Table: \n");
+            sb.append("## Relationships Cardinality: \n");
             sb.append(cardinalityTable);
+            customPrompts.add("Use the relationships cardinality info to model the database");
             sb.append("\n");
         }
 
@@ -51,6 +52,10 @@ public class PromptData2 extends PromptData {
             for (var x : customPrompts) {
                 sb.append("- ").append(x).append("\n");
             }
+            if(userDefinedPrompts != null)
+                for(var x : userDefinedPrompts) {
+                    sb.append("- ").append(x).append("\n");
+                }
             sb.append("\n");
         }
 

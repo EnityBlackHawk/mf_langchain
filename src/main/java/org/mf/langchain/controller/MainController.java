@@ -1,14 +1,11 @@
 package org.mf.langchain.controller;
 
-import dev.langchain4j.data.message.AiMessage;
-import dev.langchain4j.model.output.Response;
 import jakarta.servlet.http.HttpServletResponse;
 import org.mf.langchain.DTO.Credentials;
-import org.mf.langchain.DTO.MfResponse;
 import org.mf.langchain.DTO.Relations;
 import org.mf.langchain.DTO.SpecificationDTO;
 import org.mf.langchain.metadata.DbMetadata;
-import org.mf.langchain.metadata.RelationsCardinality;
+import org.mf.langchain.DTO.RelationsCardinalityDTO;
 import org.mf.langchain.service.LLMService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -44,7 +41,7 @@ public class MainController {
     }
 
     @PostMapping("/expr/relsCard")
-    public List<RelationsCardinality> getRelationsCardinality(@RequestBody Credentials cred) throws SQLException {
+    public List<RelationsCardinalityDTO> getRelationsCardinality(@RequestBody Credentials cred) throws SQLException {
         var dbm = new DbMetadata(cred.connectionString(), cred.username(), cred.password(), null);
         return service.getRelationsCardinality(dbm);
     }

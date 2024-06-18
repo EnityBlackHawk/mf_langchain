@@ -2,11 +2,10 @@ package org.mf.langchain.service;
 
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
-import dev.langchain4j.memory.chat.MessageWindowChatMemory;
+import com.google.gson.GsonBuilder;
 import dev.langchain4j.model.openai.OpenAiChatModel;
 import dev.langchain4j.model.openai.OpenAiChatModelName;
 import dev.langchain4j.service.AiServices;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.mf.langchain.ChatAssistant;
 import org.mf.langchain.DTO.*;
@@ -14,7 +13,7 @@ import org.mf.langchain.DataImporter;
 import org.mf.langchain.exception.DBConnectionException;
 import org.mf.langchain.metadata.Column;
 import org.mf.langchain.metadata.DbMetadata;
-import org.mf.langchain.metadata.RelationsCardinality;
+import org.mf.langchain.DTO.RelationsCardinalityDTO;
 import org.mf.langchain.metadata.Table;
 import org.mf.langchain.prompt.*;
 import org.mf.langchain.util.QueryResult;
@@ -24,13 +23,11 @@ import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Type;
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Stream;
 
 @Service
 public class LLMService {
@@ -58,22 +55,29 @@ public class LLMService {
                         spec.prioritize_performance() ? MigrationPreferences.PREFER_PERFORMANCE : MigrationPreferences.PREFER_CONSISTENCY,
                         spec.allow_ref(),
                         Framework.valueOf(spec.framework()),
-                        data.getSecond(),
+                        data.getSecond().toString(),
                         true,
                         spec.workload().stream().map(Query::new).toList(),
                         spec.custom_prompt()
                         );
         System.out.println(prompt.get());
-        var result = gptAssistant.chat(prompt.get());
+
+        //var result = gptAssistant.chat(prompt.get());
+        var result = "Response";
+
         persistenceService.persist(
                 new TestResultDTO(
                         prompt.get(),
-                        SpecificationDTO.overrideDataSource(spec, data.getFirst()),
-                        result.content().text(),
-                        result.tokenUsage().totalTokenCount()
+                        SpecificationDTO.overrideCardinality(SpecificationDTO.overrideDataSource(spec, data.getFirst()), data.getSecond()),
+                        result, //result.content().text(),
+                        0 // result.tokenUsage().totalTokenCount()
                 )
         );
-        return new MfResponse(result.content().text(), result.tokenUsage().totalTokenCount(), prompt.get(), new Date());
+        return new MfResponse(
+                result, //result.content().text(),
+                0, //result.tokenUsage().totalTokenCount(),
+                prompt.get(),
+                new Date());
     }
 
     public List<Relations> getRelations(String text, @Nullable ChatAssistant gptAssistant) {
@@ -98,13 +102,13 @@ public class LLMService {
         return gson.fromJson(response, listType);
     }
 
-    public List<RelationsCardinality> getRelationsCardinality(DbMetadata metadata) {
+    public List<RelationsCardinalityDTO> getRelationsCardinality(DbMetadata metadata) {
 
         var queries = new ArrayList<Pair<Relations, String>>();
 
         var rels = getRelations(metadata.toString(), null);
         //var rels = List.of(new Relations("aircraft", "airline", "many-to-one"));
-        List<RelationsCardinality> rcd = new ArrayList<>();
+        List<RelationsCardinalityDTO> rcd = new ArrayList<>();
 
         var templateString = new TemplatedString(
                         "SELECT {{target}}.{{target_pk}} AS id , " +
@@ -117,6 +121,7 @@ public class LLMService {
         for(var rel : rels) {
 
             if(rel.cardinality.equals("one-to-many")) continue;
+            if(rel.table_source.equals(rel.table_target)) continue;
 
             Table tSource = metadata.getTables().stream().filter((e) -> Objects.equals(e.name(), rel.table_source))
                     .findFirst().orElseThrow(RuntimeException::new);
@@ -143,15 +148,15 @@ public class LLMService {
             int min = values.stream().min(Integer::compareTo).orElseThrow(RuntimeException::new);
             int max = values.stream().max(Integer::compareTo).orElseThrow(RuntimeException::new);
             double avg = values.stream().mapToInt(Integer::intValue).average().orElseThrow();
-            rcd.add(new RelationsCardinality(q.getFirst(), min, max, avg));
+            rcd.add(new RelationsCardinalityDTO(q.getFirst(), min, max, avg));
         }
 
         return rcd;
     }
 
-    private Pair<String, String> getData(SpecificationDTO spec) {
+    private Pair<String, List<RelationsCardinalityDTO>> getData(SpecificationDTO spec) {
         String data = "";
-        String card = null;
+        List<RelationsCardinalityDTO> card = null;
 
         if(spec.data_source() == null) {
             
@@ -174,15 +179,17 @@ public class LLMService {
                 if(!mdb.isConnected())
                     throw new DBConnectionException();
                 data = mdb.toString();
-                card = DataImporter.Companion.getCardinality(mdb.getConnection());
+                //card = DataImporter.Companion.getCardinality(mdb.getConnection());
+                card = getRelationsCardinality(mdb);
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
         }
         else {
             data = spec.data_source();
-            card = new QueryResult(spec.cardinality(), "Table name", "Cardinality").asString();
+            card = spec.cardinality();
         }
+        if(card == null) throw new RuntimeException("Cardinality was null");
         return Pair.of(data, card);
     }
 }
