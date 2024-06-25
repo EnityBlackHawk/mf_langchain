@@ -64,6 +64,7 @@ public class PersistenceService {
                 specificationDto.cardinality().stream().map(this::persist).toList()
         );
         return specificationRepository.save(specification);
+
     }
 
     public Workload persist(SpecificationDTO.WorkloadDTO workloadDto) {

@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Function;
 
 @Service
 public class LLMService {
@@ -62,20 +63,20 @@ public class LLMService {
                         );
         System.out.println(prompt.get());
 
-        //var result = gptAssistant.chat(prompt.get());
-        var result = "Response";
+        var result = gptAssistant.chat(prompt.get());
+        //var result = "Response";
 
         persistenceService.persist(
                 new TestResultDTO(
                         prompt.get(),
                         SpecificationDTO.overrideCardinality(SpecificationDTO.overrideDataSource(spec, data.getFirst()), data.getSecond()),
-                        result, //result.content().text(),
-                        0 // result.tokenUsage().totalTokenCount()
+                        result.content().text(),
+                        result.tokenUsage().totalTokenCount()
                 )
         );
         return new MfResponse(
-                result, //result.content().text(),
-                0, //result.tokenUsage().totalTokenCount(),
+                result.content().text(),
+                result.tokenUsage().totalTokenCount(),
                 prompt.get(),
                 new Date());
     }
@@ -108,6 +109,7 @@ public class LLMService {
 
         var rels = getRelations(metadata.toString(), null);
         //var rels = List.of(new Relations("aircraft", "airline", "many-to-one"));
+
         List<RelationsCardinalityDTO> rcd = new ArrayList<>();
 
         var templateString = new TemplatedString(
@@ -180,7 +182,9 @@ public class LLMService {
                     throw new DBConnectionException();
                 data = mdb.toString();
                 //card = DataImporter.Companion.getCardinality(mdb.getConnection());
-                card = getRelationsCardinality(mdb);
+                if(spec.cardinality() == null)
+                    card = getRelationsCardinality(mdb);
+                else card = spec.cardinality();
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }

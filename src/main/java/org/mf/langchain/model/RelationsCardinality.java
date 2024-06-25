@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 import org.mf.langchain.DTO.RelationsCardinalityDTO;
 
 @Entity
-@Data
 @AllArgsConstructor
 public class RelationsCardinality {
 
@@ -31,6 +30,53 @@ public class RelationsCardinality {
     }
 
     public RelationsCardinality() {
+    }
 
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public String getSource() {
+        return source;
+    }
+
+    public void setSource(String source) {
+        this.source = source;
+    }
+
+    public String getTarget() {
+        return target;
+    }
+
+    public void setTarget(String target) {
+        this.target = target;
+    }
+
+    public int getMin() {
+        return min;
+    }
+
+    public void setMin(int min) {
+        this.min = min;
+    }
+
+    public int getMax() {
+        return max;
+    }
+
+    public void setMax(int max) {
+        this.max = max;
+    }
+
+    public double getAvg() {
+        return avg;
+    }
+
+    public void setAvg(double avg) {
+        this.avg = avg;
     }
 }

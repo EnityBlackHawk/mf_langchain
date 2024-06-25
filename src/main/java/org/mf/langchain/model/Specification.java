@@ -19,13 +19,14 @@ public class Specification {
     @SequenceGenerator(name = "specification_seq", sequenceName = "specification_seq", allocationSize = 1)
     private Integer id;
     private String name;
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "TEXT", length = 500)
     private String data_source;
     @OneToMany
     private List<Workload> workload;
     private Boolean allow_ref;
     private Boolean prioritize_performance;
     private String framework;
+    @Column(columnDefinition = "TEXT", length = 500)
     private String custom_prompt;
     private String LLM;
     @OneToMany
