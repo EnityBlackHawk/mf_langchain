@@ -15,12 +15,18 @@ public class PromptData2 extends PromptData {
         super(dbMetadata, migrationPreference, allowReferences, framework, queryList, remarks);
         this.useMarkdown = useMarkdown;
         this.cardinalityTable = cardinalityTable;
+        if(cardinalityTable != null) {
+            customPrompts.add("Use the relationships cardinality info to model the database");
+        }
     }
 
     public PromptData2(String sqlTables, MigrationPreferences migrationPreference, Boolean allowReferences, Framework framework, @Nullable String cardinalityTable, Boolean useMarkdown, List<Query> queryList, List<String> customPrompts) {
         super(sqlTables, migrationPreference, allowReferences, framework, queryList, customPrompts);
         this.useMarkdown = useMarkdown;
         this.cardinalityTable = cardinalityTable;
+        if(cardinalityTable != null) {
+            customPrompts.add("Use the relationships cardinality info to model the database");
+        }
     }
 
     @Override
@@ -29,7 +35,7 @@ public class PromptData2 extends PromptData {
         StringBuilder sb = new StringBuilder();
         var infos = this.getSqlTablesAndQueries();
 
-        sb.append("# Suggest a MongoDB structure for this relational database: \n")
+        sb.append("# For this relational database: \n")
                 .append("```sql\n")
                 .append(infos.getFirst())
                 .append("```\n");
@@ -42,8 +48,7 @@ public class PromptData2 extends PromptData {
         if(cardinalityTable != null)
         {
             sb.append("## Relationships Cardinality: \n");
-            sb.append(cardinalityTable);
-            customPrompts.add("Use the relationships cardinality info to model the database");
+            sb.append("```json \n").append(cardinalityTable).append("\n``` \n");
             sb.append("\n");
         }
 
@@ -59,13 +64,14 @@ public class PromptData2 extends PromptData {
             sb.append("\n");
         }
 
-        if(!customCodePrompts.isEmpty()){
-            sb.append("## Generated code remarks: \n");
-            for(var x : customCodePrompts) {
-                sb.append("- ").append(x).append("\n");
-            }
-            sb.append("\n");
-        }
+//        if(!customCodePrompts.isEmpty()){
+//            sb.append("## Generated code remarks: \n");
+//            for(var x : customCodePrompts) {
+//                sb.append("- ").append(x).append("\n");
+//            }
+//            sb.append("\n");
+//        }
+        sb.append("Your task: Suggest a MongoDB structure following the provided information.");
 
         var result = sb.toString();
         return useMarkdown ? result : removeMarkdown(result);
@@ -103,6 +109,6 @@ public class PromptData2 extends PromptData {
     @Override
     @Deprecated
     public String next() {
-        return super.next();
+        return get();
     }
 }
