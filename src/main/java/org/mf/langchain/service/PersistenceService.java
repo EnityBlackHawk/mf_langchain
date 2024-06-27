@@ -98,4 +98,15 @@ public class PersistenceService {
         return testResultRepository.findById(id).orElseThrow(() -> new IdNotFoundException(id)).getRequest();
     }
 
+    public TestResult getLatestTestResult() {
+        return testResultRepository.findTopByOrderByIdDesc().orElseThrow(() -> new RuntimeException("No test results found"));
+    }
+
+    public String getLatestTestResultResponse() {
+        return testResultRepository.findTopByOrderByIdDesc().orElseThrow().getResponse();
+    }
+
+    public String getLatestTestResultRequest() {
+        return testResultRepository.findTopByOrderByIdDesc().orElseThrow().getRequest();
+    }
 }

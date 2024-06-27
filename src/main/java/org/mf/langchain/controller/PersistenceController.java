@@ -42,4 +42,19 @@ public class PersistenceController {
     public TestResult getTestResult(@PathVariable Integer id) {
         return persistenceService.getTestResult(id);
     }
+
+    @GetMapping("/latest")
+    public TestResult getLatest() {
+        return persistenceService.getLatestTestResult();
+    }
+
+    @GetMapping("/latest/response")
+    public String getLatestResponse() {
+        return persistenceService.getLatestTestResultResponse();
+    }
+
+    @GetMapping("/latest/request")
+    public String getLatestRequest() {
+        return persistenceService.getLatestTestResultRequest();
+    }
 }

@@ -130,7 +130,8 @@ public class LLMService {
             List<Column.FkInfo> props = tSource.columns().stream().filter((e) -> e.isFk() && Objects.equals(e.fkInfo().pk_tableName(), rel.table_target))
                     .map(Column::fkInfo).toList();
 
-            if(props.isEmpty()) throw new RuntimeException("No foreign key found");
+            if(props.isEmpty())
+                throw new RuntimeException("No foreign key found");
 
             queries.addAll(
                     props.stream().map((e) -> Pair.of(rel, templateString.render(
