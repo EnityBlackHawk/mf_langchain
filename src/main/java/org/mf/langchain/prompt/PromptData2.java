@@ -15,6 +15,7 @@ public class PromptData2 extends PromptData {
         super(dbMetadata, migrationPreference, allowReferences, framework, queryList, remarks);
         this.useMarkdown = useMarkdown;
         this.cardinalityTable = cardinalityTable;
+        this.maxCalls = 1;
         if(cardinalityTable != null) {
             customPrompts.add("Use the relationships cardinality info to model the database");
         }
@@ -100,14 +101,8 @@ public class PromptData2 extends PromptData {
         return Pair.of(s, q);
     }
 
-    @Override
-    @Deprecated
-    public boolean hasNext() {
-        return super.hasNext();
-    }
 
     @Override
-    @Deprecated
     public String next() {
         return get();
     }

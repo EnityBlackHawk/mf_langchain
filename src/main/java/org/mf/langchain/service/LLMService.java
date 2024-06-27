@@ -51,7 +51,7 @@ public class LLMService {
                 .build();
         var gptAssistant = AiServices.builder(ChatAssistant.class).chatLanguageModel(gpt).build();
 
-        var prompt = new PromptData2(
+        var prompt = new PromptData3(
                         data.getFirst(),
                         spec.prioritize_performance() ? MigrationPreferences.PREFER_PERFORMANCE : MigrationPreferences.PREFER_CONSISTENCY,
                         spec.allow_ref(),

@@ -15,6 +15,7 @@ public class PromptData implements Iterator<String> {
     protected DbMetadata dbMetadata;
     protected Framework framework;
     private int callCount = 0;
+    protected int maxCalls = 2;
     protected String sqlTables;
     protected boolean allowReferences;
     protected List<String> customPrompts; //aka remarks
@@ -37,7 +38,7 @@ public class PromptData implements Iterator<String> {
         this.sqlTables = sqlTables;
         this.dbMetadata = null;
         this.allowReferences = allowReferences;
-        this.customPrompts = customPrompts;
+        this.userDefinedPrompts = customPrompts;
         populateRemarks();
     }
 
@@ -107,7 +108,7 @@ public class PromptData implements Iterator<String> {
 
     @Override
     public boolean hasNext() {
-        return callCount < 2;
+        return callCount < maxCalls;
     }
 
     @Override
@@ -127,5 +128,13 @@ public class PromptData implements Iterator<String> {
                     "- " + ((migrationPreference == MigrationPreferences.PREFER_PERFORMANCE) ? "Some documents are embedded" : "Use @DBRef annotation");
             default -> null;
         };
+    }
+
+    protected int getCallCount() {
+        return callCount;
+    }
+
+    public void reset() {
+        callCount = 0;
     }
 }
