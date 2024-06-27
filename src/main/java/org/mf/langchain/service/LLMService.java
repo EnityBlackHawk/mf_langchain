@@ -2,7 +2,6 @@ package org.mf.langchain.service;
 
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import dev.langchain4j.model.openai.OpenAiChatModel;
 import dev.langchain4j.model.openai.OpenAiChatModelName;
 import dev.langchain4j.service.AiServices;
@@ -10,10 +9,11 @@ import org.jetbrains.annotations.Nullable;
 import org.mf.langchain.ChatAssistant;
 import org.mf.langchain.DTO.*;
 import org.mf.langchain.DataImporter;
+import org.mf.langchain.enums.ProcessStepName;
 import org.mf.langchain.exception.DBConnectionException;
 import org.mf.langchain.metadata.Column;
 import org.mf.langchain.metadata.DbMetadata;
-import org.mf.langchain.DTO.RelationsCardinalityDTO;
+import org.mf.langchain.DTO.RelationCardinality;
 import org.mf.langchain.metadata.Table;
 import org.mf.langchain.prompt.*;
 import org.mf.langchain.util.QueryResult;
@@ -28,7 +28,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Function;
 
 @Service
 public class LLMService {
@@ -39,7 +38,13 @@ public class LLMService {
         this.persistenceService = persistenceService;
     }
 
-    public MfResponse Generate(SpecificationDTO spec) {
+    public MfEntity<MetadataInfoDTO> initFlow(SpecificationDTO spec) {
+        var data = getData(spec);
+        return new MfEntity<>(spec.isOnline() ? ProcessStepName.VERIFY_CARDINALITY : ProcessStepName.GENERATE_MODEL,
+                new MetadataInfoDTO(data.getFirst(), data.getSecond()));
+    }
+
+    public LLMResponse Generate(SpecificationDTO spec) {
 
         var data = getData(spec);
 
@@ -74,7 +79,7 @@ public class LLMService {
                         result.tokenUsage().totalTokenCount()
                 )
         );
-        return new MfResponse(
+        return new LLMResponse(
                 result.content().text(),
                 result.tokenUsage().totalTokenCount(),
                 prompt.get(),
@@ -103,14 +108,14 @@ public class LLMService {
         return gson.fromJson(response, listType);
     }
 
-    public List<RelationsCardinalityDTO> getRelationsCardinality(DbMetadata metadata) {
+    public List<RelationCardinality> getRelationsCardinality(DbMetadata metadata) {
 
         var queries = new ArrayList<Pair<Relations, String>>();
 
         var rels = getRelations(metadata.toString(), null);
         //var rels = List.of(new Relations("aircraft", "airline", "many-to-one"));
 
-        List<RelationsCardinalityDTO> rcd = new ArrayList<>();
+        List<RelationCardinality> rcd = new ArrayList<>();
 
         var templateString = new TemplatedString(
                         "SELECT {{target}}.{{target_pk}} AS id , " +
@@ -151,15 +156,15 @@ public class LLMService {
             int min = values.stream().min(Integer::compareTo).orElseThrow(RuntimeException::new);
             int max = values.stream().max(Integer::compareTo).orElseThrow(RuntimeException::new);
             double avg = values.stream().mapToInt(Integer::intValue).average().orElseThrow();
-            rcd.add(new RelationsCardinalityDTO(q.getFirst(), min, max, avg));
+            rcd.add(new RelationCardinality(q.getFirst(), min, max, avg));
         }
 
         return rcd;
     }
 
-    private Pair<String, List<RelationsCardinalityDTO>> getData(SpecificationDTO spec) {
+    private Pair<String, List<RelationCardinality>> getData(SpecificationDTO spec) {
         String data = "";
-        List<RelationsCardinalityDTO> card = null;
+        List<RelationCardinality> card = null;
 
         if(spec.data_source() == null) {
             

@@ -12,7 +12,7 @@ public record SpecificationDTO(
         List<String> custom_prompt,
         String LLM,
         Credentials credentials,
-        List<RelationsCardinalityDTO> cardinality
+        List<RelationCardinality> cardinality
 ) {
     public record WorkloadDTO(Integer regularity, String query) {}
 
@@ -31,7 +31,7 @@ public record SpecificationDTO(
         );
     }
 
-    public static SpecificationDTO overrideCardinality(SpecificationDTO spec, List<RelationsCardinalityDTO> cardinality) {
+    public static SpecificationDTO overrideCardinality(SpecificationDTO spec, List<RelationCardinality> cardinality) {
         return new SpecificationDTO(
                 spec.name(),
                 spec.data_source(),
@@ -44,5 +44,13 @@ public record SpecificationDTO(
                 spec.credentials(),
                 cardinality
         );
+    }
+
+    public boolean isInvalid() {
+        return data_source == null && credentials == null;
+    }
+
+    public boolean isOnline() {
+        return credentials != null;
     }
 }

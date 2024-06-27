@@ -1,7 +1,6 @@
 package org.mf.langchain.service;
 
-import org.jetbrains.annotations.Nullable;
-import org.mf.langchain.DTO.RelationsCardinalityDTO;
+import org.mf.langchain.DTO.RelationCardinality;
 import org.mf.langchain.DTO.SpecificationDTO;
 import org.mf.langchain.DTO.TestResultDTO;
 import org.mf.langchain.exception.IdNotFoundException;
@@ -76,7 +75,7 @@ public class PersistenceService {
         return workloadRepository.save(workload);
     }
 
-    public RelationsCardinality persist(RelationsCardinalityDTO dto) {
+    public RelationsCardinality persist(RelationCardinality dto) {
         var relationsCardinality = new RelationsCardinality(dto);
         var r = relationsCardinalityRepository.save(relationsCardinality);
         return r;

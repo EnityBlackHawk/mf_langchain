@@ -2,9 +2,7 @@ package org.mf.langchain.model;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.mf.langchain.DTO.RelationsCardinalityDTO;
+import org.mf.langchain.DTO.RelationCardinality;
 
 @Entity
 @AllArgsConstructor
@@ -21,7 +19,7 @@ public class RelationsCardinality {
     private double avg;
 
 
-    public RelationsCardinality(RelationsCardinalityDTO dto) {
+    public RelationsCardinality(RelationCardinality dto) {
         this.source = dto.source();
         this.target = dto.target();
         this.min = dto.min();
