@@ -29,8 +29,7 @@ public class MainController {
     public MfEntity<?> mainEndpoint(@RequestBody MfEntity<?> data) throws Throwable {
         return switch (data.nextStep()) {
             case INIT -> service.initFlow(TryCast.cast(data.data(), SpecificationDTO.class, () -> new InvalidData(data.nextStep())));
-            case VERIFY_CARDINALITY -> null;
-            case GENERATE_MODEL -> null;
+            case GENERATE_MODEL -> service.generateModel(TryCast.cast(data.data(), GenerateSpecsDTO.class, () -> new InvalidData(data.nextStep())));
             case GENERATE_JAVA_CODE -> null;
         };
     }
@@ -52,7 +51,7 @@ public class MainController {
 
     @PostMapping("/expr/relsCard")
     public List<RelationCardinality> getRelationsCardinality(@RequestBody Credentials cred) throws SQLException {
-        var dbm = new DbMetadata(cred.connectionString(), cred.username(), cred.password(), null);
+        var dbm = new DbMetadata(cred.getConnectionString(), cred.getUsername(), cred.getPassword(), null);
         return service.getRelationsCardinality(dbm);
     }
 

@@ -3,7 +3,7 @@ package org.mf.langchain.enums;
 public enum ProcessStepName {
 
     INIT("INIT"), // Initialize the flow
-    VERIFY_CARDINALITY("VERIFY_CARDINALITY"), // Show the cardinality to the user (the user can edit it)
+    // VERIFY_CARDINALITY("VERIFY_CARDINALITY"), // Show the cardinality to the user (the user can edit it)
     GENERATE_MODEL("GENERATE_MODEL"), // Generate the model (the user needs to approve the model)
     GENERATE_JAVA_CODE("GENERATE_JAVA_CODE"); // Generate the Java code
 

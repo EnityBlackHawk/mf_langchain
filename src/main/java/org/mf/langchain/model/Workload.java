@@ -20,7 +20,7 @@ public class Workload {
             this.query = query;
         }
     public Workload(SpecificationDTO.WorkloadDTO dto){
-        this(null, dto.regularity(), dto.query());
+        this(null, dto.getRegularity(), dto.getQuery());
     }
 
     public Workload() {}

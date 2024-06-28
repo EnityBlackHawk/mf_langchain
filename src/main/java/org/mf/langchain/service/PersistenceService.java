@@ -69,8 +69,8 @@ public class PersistenceService {
     public Workload persist(SpecificationDTO.WorkloadDTO workloadDto) {
         var workload = new Workload(
                 null,
-                workloadDto.regularity(),
-                workloadDto.query()
+                workloadDto.getRegularity(),
+                workloadDto.getQuery()
         );
         return workloadRepository.save(workload);
     }

@@ -33,6 +33,7 @@ dependencies {
     implementation("com.google.code.gson:gson:2.10.1")
     implementation("com.squareup.okhttp3:okhttp:5.0.0-alpha.9")
     implementation("io.hypersistence:hypersistence-utils-hibernate-60:3.7.6")
+    implementation("org.modelmapper:modelmapper:3.2.0")
 
 }
 

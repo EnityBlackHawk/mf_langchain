@@ -80,7 +80,7 @@ public class DbMetadata {
     }
 
     public DbMetadata(Credentials credentials, @Nullable String tableNamePatter) throws SQLException {
-        this(credentials.connectionString(), credentials.username(), credentials.password(), tableNamePatter);
+        this(credentials.getConnectionString(), credentials.getUsername(), credentials.getPassword(), tableNamePatter);
     }
 
     public DbMetadata(String connectionString, String username, String password, @Nullable String tableNamePatter) throws SQLException {

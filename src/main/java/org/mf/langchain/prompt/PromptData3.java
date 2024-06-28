@@ -22,9 +22,9 @@ public class PromptData3 extends PromptData2{
     public String getFirst() {
         StringBuilder sb = new StringBuilder();
         var infos = getSqlTablesAndQueries();
-        sb.append("You are an expert in database modeling and Java programming. Your task is to help migrate a relational database to a MongoDB database. Follow the instructions and details provided below to generate the MongoDB model and the necessary Java code for the migration. \n")
+        sb.append("You are an expert in database modeling. Your task is to help migrate a relational database to a MongoDB database. Follow the instructions and details provided below to generate the MongoDB model. \n")
                 .append("### Task Overview\n")
-                .append("We have a relational database that needs to be migrated to MongoDB. The goal is to create an optimized MongoDB schema based on the usage patterns of the data and to generate Java code to facilitate the migration. \n");
+                .append("We have a relational database that needs to be migrated to MongoDB. The goal is to create an optimized MongoDB schema based on the usage patterns of the data. \n");
 
         sb.append("### Relational Database Schema").append("\n");
         sb.append("Here is the schema of our current relational database:").append("\n");
@@ -49,7 +49,7 @@ public class PromptData3 extends PromptData2{
         }
 
         sb.append("### Output format").append("\n");
-        sb.append("- MongoDB model as JSON documents").append("\n");
+        sb.append("- MongoDB models in JSON format").append("\n");
 
         sb.append("Please generate the MongoDB model");
 
@@ -71,6 +71,7 @@ public class PromptData3 extends PromptData2{
 
     @Override
     public String next() {
+        addCallCount();
         return switch (getCallCount()) {
             case 1 -> getFirst();
             case 2 -> getSecond();

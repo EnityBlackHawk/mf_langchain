@@ -38,11 +38,53 @@ public class LLMService {
         this.persistenceService = persistenceService;
     }
 
-    public MfEntity<MetadataInfoDTO> initFlow(SpecificationDTO spec) {
+    public MfEntity<?> initFlow(SpecificationDTO spec) {
         var data = getData(spec);
-        return new MfEntity<>(spec.isOnline() ? ProcessStepName.VERIFY_CARDINALITY : ProcessStepName.GENERATE_MODEL,
-                new MetadataInfoDTO(data.getFirst(), data.getSecond()));
+        var mtInfo = new MetadataInfoDTO(data.getFirst(), data.getSecond());
+        if(spec.isOnline())
+            return new MfEntity<>(ProcessStepName.GENERATE_MODEL, mtInfo);
+
+        return generateModel(new GenerateSpecsDTO(spec, mtInfo));
     }
+
+    public MfEntity<ModelDTO> generateModel(GenerateSpecsDTO gSpecs) {
+        var gpt = new OpenAiChatModel.OpenAiChatModelBuilder()
+                .apiKey(System.getenv("GPT_KEY"))
+                .modelName(gSpecs.getSpecification().LLM())
+                .maxRetries(1)
+                .temperature(1d)
+                .build();
+        var gptAssistant = AiServices.builder(ChatAssistant.class).chatLanguageModel(gpt).build();
+
+        var prompt = new PromptData3(
+                gSpecs.getMetadataInfo().getSql(),
+                gSpecs.getSpecification().prioritize_performance() ? MigrationPreferences.PREFER_PERFORMANCE : MigrationPreferences.PREFER_CONSISTENCY,
+                gSpecs.getSpecification().allow_ref(),
+                Framework.valueOf(gSpecs.getSpecification().framework()),
+                gSpecs.getMetadataInfo().getRelations().toString(),
+                true,
+                gSpecs.getSpecification().workload().stream().map(Query::new).toList(),
+                gSpecs.getSpecification().custom_prompt()
+
+        );
+        var p = prompt.next();
+        var result = gptAssistant.chat(p);
+        System.out.println(result.content().text());
+
+
+//        persistenceService.persist(
+//                new TestResultDTO(
+//                        prompt.get(),
+//                        SpecificationDTO.overrideCardinality(SpecificationDTO.overrideDataSource(gSpecs.getSpecification(), gSpecs.getMetadataInfo().getSql()), gSpecs.getMetadataInfo().getRelations()),
+//                        result.content().text(),
+//                        result.tokenUsage().totalTokenCount()
+//                )
+//        );
+
+
+        return new MfEntity<>(ProcessStepName.GENERATE_JAVA_CODE, new ModelDTO(result.content().text(), result.tokenUsage().totalTokenCount()));
+    }
+
 
     public LLMResponse Generate(SpecificationDTO spec) {
 
@@ -119,9 +161,9 @@ public class LLMService {
 
         var templateString = new TemplatedString(
                         "SELECT {{target}}.{{target_pk}} AS id , " +
-                        "COUNT({{source}}.{{source_pk}}) AS number_of_{{source}} " +
-                        "FROM {{source}} " +
-                        "JOIN {{target}} ON {{source}}.{{prop}} = {{target}}.{{target_pk}} " +
+                        "COUNT({{getSource}}.{{source_pk}}) AS number_of_{{getSource}} " +
+                        "FROM {{getSource}} " +
+                        "JOIN {{target}} ON {{getSource}}.{{prop}} = {{target}}.{{target_pk}} " +
                         "GROUP BY {{target}}.{{target_pk}}"
         );
 
@@ -140,7 +182,7 @@ public class LLMService {
 
             queries.addAll(
                     props.stream().map((e) -> Pair.of(rel, templateString.render(
-                            Pair.of("source", rel.table_source),
+                            Pair.of("getSource", rel.table_source),
                             Pair.of("target", rel.table_target),
                             Pair.of("target_pk", e.pk_name()),
                             Pair.of("source_pk", tSource.getPrimaryKey().name()),
@@ -169,17 +211,17 @@ public class LLMService {
         if(spec.data_source() == null) {
             
             if(spec.credentials() == null)
-                throw new RuntimeException("Credentials are required when not proving data source");
+                throw new RuntimeException("Credentials are required when not proving data getSource");
             
-            if(spec.credentials().connectionString() == null) 
-                throw new RuntimeException("credentials.connectionString is required when not proving data source");
+            if(spec.credentials().getConnectionString() == null)
+                throw new RuntimeException("credentials.connectionString is required when not proving data getSource");
             
             var cred = spec.credentials();
-            var user = cred.username() != null ? cred.username() : "admin";
-            var passw = cred.password() != null ? cred.password() : "admin";
+            var user = cred.getUsername() != null ? cred.getUsername() : "admin";
+            var passw = cred.getPassword() != null ? cred.getPassword() : "admin";
             try {
                 var mdb = new DbMetadata(
-                        spec.credentials().connectionString(),
+                        spec.credentials().getConnectionString(),
                         user,
                         passw,
                         null);

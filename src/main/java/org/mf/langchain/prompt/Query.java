@@ -11,7 +11,7 @@ import java.util.List;
 public record Query(String query, Integer regularity) {
 
     public Query(SpecificationDTO.WorkloadDTO workloadDTO) {
-        this(workloadDTO.query(), workloadDTO.regularity());
+        this(workloadDTO.getQuery(), workloadDTO.getRegularity());
     }
 
     public static List<Query> from(String path) throws IOException {

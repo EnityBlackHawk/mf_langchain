@@ -130,6 +130,10 @@ public class PromptData implements Iterator<String> {
         };
     }
 
+    protected void addCallCount() {
+        callCount++;
+    }
+
     protected int getCallCount() {
         return callCount;
     }

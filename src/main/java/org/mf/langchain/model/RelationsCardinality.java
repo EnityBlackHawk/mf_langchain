@@ -20,11 +20,11 @@ public class RelationsCardinality {
 
 
     public RelationsCardinality(RelationCardinality dto) {
-        this.source = dto.source();
-        this.target = dto.target();
-        this.min = dto.min();
-        this.max = dto.max();
-        this.avg = dto.avg();
+        this.source = dto.getSource();
+        this.target = dto.getTarget();
+        this.min = dto.getMin();
+        this.max = dto.getMax();
+        this.avg = dto.getAvg();
     }
 
     public RelationsCardinality() {
