@@ -9,6 +9,7 @@ import org.jetbrains.annotations.Nullable;
 import org.mf.langchain.ChatAssistant;
 import org.mf.langchain.DTO.*;
 import org.mf.langchain.DataImporter;
+import org.mf.langchain.MockLayer;
 import org.mf.langchain.enums.ProcessStepName;
 import org.mf.langchain.exception.DBConnectionException;
 import org.mf.langchain.metadata.Column;
@@ -24,10 +25,7 @@ import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Type;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Service
 public class LLMService {
@@ -68,8 +66,28 @@ public class LLMService {
 
         );
         var p = prompt.next();
-        var result = gptAssistant.chat(p);
-        System.out.println(result.content().text());
+        int tokens = 0;
+        String resultString;
+        ArrayList<String> objs = new ArrayList<>();
+
+        if(MockLayer.isActivated) {
+            resultString = MockLayer.MOCK_GENERATE_MODEL;
+        }
+        else {
+            var result = gptAssistant.chat(p);
+            tokens = result.tokenUsage().totalTokenCount();
+            resultString = result.content().text();
+        }
+
+        while (true) {
+            int iS = resultString.indexOf("```json");
+            if(iS == -1) break;
+            iS += 7;
+            int iE = resultString.indexOf("```", iS);
+            objs.add(resultString.substring(iS, iE));
+            resultString = resultString.substring(iE + 3);
+        }
+
 
 
 //        persistenceService.persist(
@@ -81,10 +99,37 @@ public class LLMService {
 //                )
 //        );
 
+        var finalResult = objs.stream().reduce("", String::concat);
+        System.out.println(finalResult);
 
-        return new MfEntity<>(ProcessStepName.GENERATE_JAVA_CODE, new ModelDTO(result.content().text(), result.tokenUsage().totalTokenCount()));
+        return new MfEntity<>(ProcessStepName.GENERATE_JAVA_CODE, new ModelDTO(finalResult, tokens));
     }
 
+    public MfEntity<?> generateJavaCode(ModelDTO model) {
+        var gpt = new OpenAiChatModel.OpenAiChatModelBuilder()
+                .apiKey(System.getenv("GPT_KEY"))
+                .modelName("gpt-3.5-turbo")
+                .maxRetries(1)
+                .temperature(1d)
+                .build();
+        var gptAssistant = AiServices.builder(ChatAssistant.class).chatLanguageModel(gpt).build();
+        int token = 0;
+        String result;
+
+        if(MockLayer.isActivated) {
+            result = MockLayer.MOCK_GENERATE_JAVA_CODE;
+        }
+        else {
+            var prompt = PromptData3.getSecond(model.getModel(), Framework.SPRING_DATA);
+            var res = gptAssistant.chat(prompt);
+            result = res.content().text();
+            token = res.tokenUsage().totalTokenCount();
+            System.out.println(result);
+        }
+
+        return new MfEntity<String>(ProcessStepName.FINAL, result);
+
+    }
 
     public LLMResponse Generate(SpecificationDTO spec) {
 

@@ -14,10 +14,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Locale;
+
 
 @RestController
 @RequestMapping("/api")
 public class MainController {
+
 
     private final LLMService service;
 
@@ -30,7 +33,8 @@ public class MainController {
         return switch (data.nextStep()) {
             case INIT -> service.initFlow(TryCast.cast(data.data(), SpecificationDTO.class, () -> new InvalidData(data.nextStep())));
             case GENERATE_MODEL -> service.generateModel(TryCast.cast(data.data(), GenerateSpecsDTO.class, () -> new InvalidData(data.nextStep())));
-            case GENERATE_JAVA_CODE -> null;
+            case GENERATE_JAVA_CODE -> service.generateJavaCode(TryCast.cast(data.data(), ModelDTO.class, () -> new InvalidData(data.nextStep())));
+            case FINAL -> null;
         };
     }
 

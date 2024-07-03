@@ -14,7 +14,7 @@ public class LangchainApplication {
 
     public static void main(String[] args) throws IOException, SQLException {
         var context = SpringApplication.run(LangchainApplication.class, args);
-
+        MockLayer.isActivated = false;
 
 
         /*
