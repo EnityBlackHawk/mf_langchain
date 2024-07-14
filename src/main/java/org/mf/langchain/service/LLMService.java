@@ -131,6 +131,21 @@ public class LLMService {
 
     }
 
+    public LLMResponse runBasic(Credentials credentials) throws SQLException {
+        var mdb = new DbMetadata(credentials.getConnectionString(), credentials.getUsername(), credentials.getPassword(), null);
+        var gpt = new OpenAiChatModel.OpenAiChatModelBuilder()
+                .apiKey(System.getenv("GPT_KEY"))
+                .modelName("gpt-4o")
+                .maxRetries(1)
+                .temperature(1d)
+                .build();
+        var gptAssistant = AiServices.builder(ChatAssistant.class).chatLanguageModel(gpt).build();
+        var prompt = new PromptData(mdb, MigrationPreferences.PREFER_PERFORMANCE, true, Framework.SPRING_DATA, null, null);
+        var text = prompt.get();
+        var res = gptAssistant.chat(text);
+        return new LLMResponse(res.content().text(), res.tokenUsage().totalTokenCount(), prompt.get(), new Date());
+    }
+
     public LLMResponse Generate(SpecificationDTO spec) {
 
         var data = getData(spec);

@@ -10,6 +10,10 @@ services:
       - ./data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+  mongodb:
+    image: mongodb/mongodb-community-server:latest
+    ports:
+      - "27017:27017"
   mf_server:
     build: .
     image: entityblackhawk/mf-server:latest

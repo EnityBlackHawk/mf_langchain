@@ -28,6 +28,7 @@ public class PromptData implements Iterator<String> {
         this.dbMetadata = dbMetadata;
         this.framework = framework;
         this.userDefinedPrompts = customPrompts;
+        this.allowReferences = allowReferences;
         populateRemarks();
     }
 
@@ -73,9 +74,10 @@ public class PromptData implements Iterator<String> {
         }
 
         String q = "";
-        for(var x : queryList) {
-            q = q.concat(x.query() + (x.regularity() != null ? "\n" + "- This query is used " + x.regularity() + "% of the time\n" : ""));
-        }
+        if(queryList != null)
+            for(var x : queryList) {
+                q = q.concat(x.query() + (x.regularity() != null ? "\n" + "- This query is used " + x.regularity() + "% of the time\n" : ""));
+            }
         return Pair.of(s, q);
     }
 
@@ -103,6 +105,9 @@ public class PromptData implements Iterator<String> {
              for(var x : customCodePrompts) {
                  result = result.concat("- " + x + "\n");
              }
+
+         result = result.concat("Generate a Java code based on the provided information\n");
+
          return result;
     }
 

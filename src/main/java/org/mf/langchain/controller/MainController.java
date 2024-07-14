@@ -59,4 +59,12 @@ public class MainController {
         return service.getRelationsCardinality(dbm);
     }
 
+    @PostMapping("/art")
+    public String runBasic(@RequestBody Credentials credentials, HttpServletResponse response) throws SQLException {
+        var result = service.runBasic(credentials);
+        response.addHeader("Total-Tokens", String.valueOf(result.tokens()));
+        response.addHeader("Prompt", result.prompt());
+        return result.aiResponse();
+    }
+
 }
