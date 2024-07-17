@@ -68,7 +68,7 @@ public class MainController {
     }
 
     @PostMapping("/art/push")
-    public String runPush() {
+    public String runPush() throws SQLException {
         service.pushMigration();
         return "OK";
     }

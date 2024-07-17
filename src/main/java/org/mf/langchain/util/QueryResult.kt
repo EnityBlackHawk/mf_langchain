@@ -1,5 +1,6 @@
 package org.mf.langchain.util
 
+import org.springframework.data.annotation.Id
 import java.sql.ResultSet
 import java.util.*
 import java.lang.Integer
@@ -55,7 +56,7 @@ class QueryResult {
         var formatSting = ""
         for(i in 0 until  columns.size) {
             formatSting += ("%${
-                (rows.map { it[i] }.maxByOrNull { it: String -> it.length }?.length ?: 0).coerceAtLeast(
+                (rows.map { it[i] }.maxByOrNull { it: String? -> it?.length ?: 0  }?.length ?: 0).coerceAtLeast(
                     columns[i].length
                 )
             }s" + if (i + 1 == columns.size) "" else " | ")
@@ -68,6 +69,45 @@ class QueryResult {
         }
 
         return sb.toString()
+    }
+
+    fun <T> asObject(clazz : Class<T>) : List<T> {
+        val res = mutableListOf<T>()
+        for (row in rows) {
+            val obj = clazz.getDeclaredConstructor().newInstance()
+            for (i in 0 until columns.size) {
+                val field = clazz.getDeclaredField(columns[i].snakeToCamelCase())
+                field.isAccessible = true
+                if(row[i] == null || row[i].isEmpty()) continue
+                when (field.type.name) {
+                    "int" -> field.set(obj, row[i].toInt())
+                    "long" -> field.set(obj, row[i].toLong())
+                    "float" -> field.set(obj, row[i].toFloat())
+                    "double" -> field.set(obj, row[i].toDouble())
+                    "java.lang.String" -> field.set(obj, row[i])
+                    "java.sql.Date" -> field.set(obj, java.sql.Date.valueOf(row[i]))
+                    "java.util.Date" -> field.set(obj, Date(java.sql.Date.valueOf(row[i]).time))
+                    "java.sql.Timestamp" -> field.set(obj, java.sql.Timestamp.valueOf(row[i]))
+                    "java.sql.Time" -> field.set(obj, java.sql.Time.valueOf(row[i]))
+                    else -> {
+                        val c = field.type
+                        val o = c.getDeclaredConstructor().newInstance()
+                        val ann = c.declaredFields.map { it.annotations }
+                        val fId = c.declaredFields.first { it.isAnnotationPresent(Id::class.java) }
+                        fId.isAccessible = true
+                        fId.set(o, row[i])
+                        field.set(obj, o)
+                    }
+                }
+            }
+            res.add(obj)
+        }
+        return res;
+    }
+
+    fun String.snakeToCamelCase(): String {
+        val pattern = "_[a-z]".toRegex()
+        return replace(pattern) { it.value.last().uppercase() }
     }
 
     override fun toString() : String {

@@ -11,8 +11,7 @@ import org.mf.langchain.ConvertToJavaFile;
 import org.mf.langchain.DTO.*;
 import org.mf.langchain.DataImporter;
 import org.mf.langchain.MockLayer;
-import org.mf.langchain.auto.Passenger;
-import org.mf.langchain.auto.PassengerRepository;
+import org.mf.langchain.auto.*;
 import org.mf.langchain.enums.ProcessStepName;
 import org.mf.langchain.exception.DBConnectionException;
 import org.mf.langchain.metadata.Column;
@@ -35,10 +34,20 @@ public class LLMService {
 
     private final PersistenceService persistenceService;
     private final PassengerRepository passengerRepository;
+    private final AirlineRepository airlineRepository;
+    private final FlightRepository flightRepository;
+    private final AircraftRepository aircraftRepository;
+    private final AirportRepository airportRepository;
+    private final BookingRepository bookingRepository;
 
-    public LLMService(@Autowired PersistenceService persistenceService, @Autowired PassengerRepository passengerRepository){
+    public LLMService(@Autowired PersistenceService persistenceService, @Autowired PassengerRepository passengerRepository, AirlineRepository airlineRepository, FlightRepository flightRepository, AircraftRepository aircraftRepository, AirportRepository airportRepository, BookingRepository bookingRepository){
         this.persistenceService = persistenceService;
         this.passengerRepository = passengerRepository;
+        this.airlineRepository = airlineRepository;
+        this.flightRepository = flightRepository;
+        this.aircraftRepository = aircraftRepository;
+        this.airportRepository = airportRepository;
+        this.bookingRepository = bookingRepository;
     }
 
     public MfEntity<?> initFlow(SpecificationDTO spec) {
@@ -311,6 +320,31 @@ public class LLMService {
         return Pair.of(data, card);
     }
 
-    public void pushMigration() {
+    public void pushMigration() throws SQLException {
+        var dbm = new DbMetadata("jdbc:postgresql://localhost:5432/airport3", "admin", "admin", null);
+
+        var qr = DataImporter.Companion.runQuery("SELECT * FROM airline", dbm.getConnection(), QueryResult.class);
+        List<Airline> airlines = qr.asObject(Airline.class);
+        airlineRepository.saveAll(airlines);
+
+        var qr_passengers = DataImporter.Companion.runQuery("SELECT * FROM passenger", dbm.getConnection(), QueryResult.class);
+        List<Passenger> passengers = qr_passengers.asObject(Passenger.class);
+        passengerRepository.saveAll(passengers);
+
+        var qr_flights = DataImporter.Companion.runQuery("SELECT * FROM flight", dbm.getConnection(), QueryResult.class);
+        List<Flight> flights = qr_flights.asObject(Flight.class);
+        flightRepository.saveAll(flights);
+
+        var qr_aircraft = DataImporter.Companion.runQuery("SELECT * FROM aircraft", dbm.getConnection(), QueryResult.class);
+        List<Aircraft> aircrafts = qr_aircraft.asObject(Aircraft.class);
+        aircraftRepository.saveAll(aircrafts);
+
+        var qr_airports = DataImporter.Companion.runQuery("SELECT * FROM airport", dbm.getConnection(), QueryResult.class);
+        List<Airport> airports = qr_airports.asObject(Airport.class);
+        airportRepository.saveAll(airports);
+
+        var qr_bookings = DataImporter.Companion.runQuery("SELECT * FROM booking", dbm.getConnection(), QueryResult.class);
+        List<Booking> bookings = qr_bookings.asObject(Booking.class);
+        bookingRepository.saveAll(bookings);
     }
 }
