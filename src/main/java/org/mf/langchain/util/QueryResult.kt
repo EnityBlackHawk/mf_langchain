@@ -97,6 +97,7 @@ class QueryResult(private val con: Connection?) {
                     "java.util.Date" -> field.set(obj, Date(java.sql.Date.valueOf(row[i]).time))
                     "java.sql.Timestamp" -> field.set(obj, java.sql.Timestamp.valueOf(row[i]))
                     "java.sql.Time" -> field.set(obj, java.sql.Time.valueOf(row[i]))
+                    "java.time.LocalDateTime" -> field.set(obj, java.time.LocalDateTime.parse(row[i].replace(" ", "T")))
                     else -> {
                         val isRef = field.isAnnotationPresent(org.springframework.data.mongodb.core.mapping.DBRef::class.java)
                         val c = field.type

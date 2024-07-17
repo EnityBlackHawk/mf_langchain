@@ -199,15 +199,20 @@ public class ConvertToJavaFile {
 
         for(String c : contents){
             var classNameIndex = c.indexOf("class");
-            var className = c.substring(classNameIndex + 6, c.indexOf("{")).trim();
+            var isInterface = classNameIndex == -1;
+            if(isInterface) {
+                classNameIndex = c.indexOf("interface");
+            }
+            var className = c.substring(classNameIndex + (isInterface ? 9 : 6), c.indexOf( isInterface ? "extends" : "{")).trim();
             try {
                 BufferedWriter writer = new BufferedWriter(new FileWriter(path + className + ".java"));
                 writer.write("package " + _package + ";\n\n");
                 writer.write(c);
                 writer.close();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
         }
 
     }

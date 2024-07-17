@@ -106,8 +106,24 @@ public class PromptData implements Iterator<String> {
                  result = result.concat("- " + x + "\n");
              }
 
-         result = result.concat("Generate a Java code based on the provided information\n");
-
+         result = result.concat("Generate a Java code based on the provided information. Each Java file in a separated markdown code block\n");
+         result = result.concat("""
+                 example:\s
+                 ```java
+                 public class Aircraft {
+                     private String id;
+                     private String type;
+                     private Airline airline;
+                     private Manufacturer manufacturer;
+                     private String registration;
+                     private int maxPassengers;
+                 }
+                 ```""");
+         result = result.concat("""
+                 ```java
+                 public interface AircraftRepository extends MongoRepository<Aircraft, String> {
+                 }
+                 ```""");
          return result;
     }
 

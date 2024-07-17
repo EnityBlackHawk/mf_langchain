@@ -1,14 +1,12 @@
 package org.mf.langchain.auto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
+// Passenger.java
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Data
-@Document(collection = "passenger")
+@Document
 public class Passenger {
     @Id
     private String id;
