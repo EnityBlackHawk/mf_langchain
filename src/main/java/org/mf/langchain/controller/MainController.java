@@ -67,4 +67,10 @@ public class MainController {
         return result.aiResponse();
     }
 
+    @PostMapping("/art/push")
+    public String runPush() {
+        service.pushMigration();
+        return "OK";
+    }
+
 }

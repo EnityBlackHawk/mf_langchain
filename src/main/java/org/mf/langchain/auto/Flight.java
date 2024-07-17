@@ -1,25 +1,25 @@
 package org.mf.langchain.auto;
 
-// Flight.java
 import lombok.Data;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 
+import java.util.Date;
+
 @Data
+@Document(collection = "flight")
 public class Flight {
     @Id
-    private String number;
-    private Integer gate;
-    private String departureTimeScheduled;
-    private String departureTimeActual;
-    private String arrivalTimeScheduled;
-    private String arrivalTimeActual;
+    private String id;
+    private String airportFrom;
+    private String airportTo;
+    private Date departureTimeScheduled;
+    private Date departureTimeActual;
+    private Date arrivalTimeScheduled;
+    private Date arrivalTimeActual;
+    private int gate;
     @DBRef
     private Aircraft aircraft;
-    @DBRef
-    private Airport airportFrom;
-    @DBRef
-    private Airport airportTo;
-    @DBRef
-    private Flight connectsTo;
+    private String connectsTo;
 }

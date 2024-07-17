@@ -2,6 +2,7 @@ plugins {
     java
     id("org.springframework.boot") version "3.2.2"
     id("io.spring.dependency-management") version "1.1.4"
+    id("io.freefair.lombok") version "8.6"
     kotlin("jvm")
 }
 
@@ -17,7 +18,6 @@ repositories {
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
-    implementation("org.projectlombok:lombok")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
@@ -34,6 +34,8 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:5.0.0-alpha.9")
     implementation("io.hypersistence:hypersistence-utils-hibernate-60:3.7.6")
     implementation("org.modelmapper:modelmapper:3.2.0")
+    compileOnly ("org.projectlombok:lombok:1.18.8")
+    annotationProcessor ("org.projectlombok:lombok:1.18.8")
 
 }
 

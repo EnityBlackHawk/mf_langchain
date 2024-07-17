@@ -6,15 +6,12 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 
 @Data
-@Document(collection = "aircraft")
-public class Aircraft {
+@Document(collection = "booking")
+public class Booking {
     @Id
     private String id;
-    private String type;
+    private String flightNumber;
     @DBRef
-    private Airline airline;
-    @DBRef
-    private Manufacturer manufacturer;
-    private String registration;
-    private int maxPassengers;
+    private Passenger passenger;
+    private String seat;
 }

@@ -7,9 +7,12 @@ import dev.langchain4j.model.openai.OpenAiChatModelName;
 import dev.langchain4j.service.AiServices;
 import org.jetbrains.annotations.Nullable;
 import org.mf.langchain.ChatAssistant;
+import org.mf.langchain.ConvertToJavaFile;
 import org.mf.langchain.DTO.*;
 import org.mf.langchain.DataImporter;
 import org.mf.langchain.MockLayer;
+import org.mf.langchain.auto.Passenger;
+import org.mf.langchain.auto.PassengerRepository;
 import org.mf.langchain.enums.ProcessStepName;
 import org.mf.langchain.exception.DBConnectionException;
 import org.mf.langchain.metadata.Column;
@@ -31,9 +34,11 @@ import java.util.*;
 public class LLMService {
 
     private final PersistenceService persistenceService;
+    private final PassengerRepository passengerRepository;
 
-    public LLMService(@Autowired PersistenceService persistenceService){
+    public LLMService(@Autowired PersistenceService persistenceService, @Autowired PassengerRepository passengerRepository){
         this.persistenceService = persistenceService;
+        this.passengerRepository = passengerRepository;
     }
 
     public MfEntity<?> initFlow(SpecificationDTO spec) {
@@ -143,6 +148,7 @@ public class LLMService {
         var prompt = new PromptData(mdb, MigrationPreferences.PREFER_PERFORMANCE, true, Framework.SPRING_DATA, null, null);
         var text = prompt.get();
         var res = gptAssistant.chat(text);
+        ConvertToJavaFile.toFile("src/main/java/org/mf/langchain/auto/", "org.mf.langchain.auto",res.content().text());
         return new LLMResponse(res.content().text(), res.tokenUsage().totalTokenCount(), prompt.get(), new Date());
     }
 
@@ -303,5 +309,8 @@ public class LLMService {
         }
         if(card == null) throw new RuntimeException("Cardinality was null");
         return Pair.of(data, card);
+    }
+
+    public void pushMigration() {
     }
 }
