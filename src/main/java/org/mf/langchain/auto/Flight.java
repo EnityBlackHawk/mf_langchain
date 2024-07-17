@@ -20,7 +20,6 @@ public class Flight {
     private Timestamp arrivalTimeScheduled;
     private Timestamp arrivalTimeActual;
     private int gate;
-    @DBRef
     private Aircraft aircraft;
     private String connectsTo;
 }

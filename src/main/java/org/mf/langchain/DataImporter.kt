@@ -87,7 +87,7 @@ class DataImporter {
                     val rs = statement.executeQuery(sql)
                     val res = when(output) {
                         ResultSet::class.java -> rs as T
-                        QueryResult::class.java -> QueryResult(rs) as T
+                        QueryResult::class.java -> QueryResult(rs, connection) as T
                         else -> throw IllegalArgumentException("Unsupported output class")
                     }
                     statement.close()

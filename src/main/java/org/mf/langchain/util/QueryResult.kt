@@ -1,15 +1,19 @@
 package org.mf.langchain.util
 
+import com.mongodb.DBRef
+import org.mf.langchain.DataImporter
 import org.springframework.data.annotation.Id
 import java.sql.ResultSet
 import java.util.*
 import java.lang.Integer
+import java.sql.Connection
 
-class QueryResult {
+class QueryResult(private val con: Connection?) {
     private val columns = mutableListOf<String>()
     private val rows = mutableListOf<List<String>>()
 
-    constructor(resultSet: ResultSet) {
+    constructor(resultSet: ResultSet, con: Connection? = null) : this(con) {
+
         for (i in 0 until resultSet.metaData.columnCount) {
             columns.add(resultSet.metaData.getColumnName(i + 1))
         }
@@ -23,7 +27,7 @@ class QueryResult {
         }
     }
 
-    constructor(map : Map<String, Int>, vararg columnNames : String) {
+    constructor(map : Map<String, Int>, vararg columnNames : String) : this(null) {
         this.columns.addAll(columnNames)
         for((k, v) in map) {
             addRow(k, v.toString())
@@ -75,8 +79,12 @@ class QueryResult {
         val res = mutableListOf<T>()
         for (row in rows) {
             val obj = clazz.getDeclaredConstructor().newInstance()
+
             for (i in 0 until columns.size) {
-                val field = clazz.getDeclaredField(columns[i].snakeToCamelCase())
+                val field = runCatching {
+                    clazz.getDeclaredField(columns[i].snakeToCamelCase())
+                }.getOrNull()
+                if(field == null) continue
                 field.isAccessible = true
                 if(row[i] == null || row[i].isEmpty()) continue
                 when (field.type.name) {
@@ -90,13 +98,23 @@ class QueryResult {
                     "java.sql.Timestamp" -> field.set(obj, java.sql.Timestamp.valueOf(row[i]))
                     "java.sql.Time" -> field.set(obj, java.sql.Time.valueOf(row[i]))
                     else -> {
+                        val isRef = field.isAnnotationPresent(org.springframework.data.mongodb.core.mapping.DBRef::class.java)
                         val c = field.type
                         val o = c.getDeclaredConstructor().newInstance()
-                        val ann = c.declaredFields.map { it.annotations }
-                        val fId = c.declaredFields.first { it.isAnnotationPresent(Id::class.java) }
-                        fId.isAccessible = true
-                        fId.set(o, row[i])
-                        field.set(obj, o)
+                        val fs = c.declaredFields
+                        val fId = fs.first { it.isAnnotationPresent(Id::class.java) }
+                        if(isRef) {
+                            fId.isAccessible = true
+                            fId.set(o, row[i])
+                            field.set(obj, o)
+                            continue
+                        }
+                        if(con == null) throw Exception("Connection is null")
+                        val tableName = c.simpleName.lowercase()
+                        DataImporter.runQuery("SELECT * FROM $tableName WHERE ${fId.name} = '${row[i]}'", con, QueryResult::class.java)
+                            .asObject(c).firstOrNull()?.let {
+                            field.set(obj, it)
+                        }
                     }
                 }
             }

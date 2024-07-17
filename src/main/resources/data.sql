@@ -12,7 +12,7 @@ CREATE TABLE aircraft (
                           id INT PRIMARY KEY,
                           type TEXT UNIQUE,
                           airline INT REFERENCES airline(id),
-                          manufacturer_id INT REFERENCES manufacturer(id),
+                          manufacturer INT REFERENCES manufacturer(id),
                           registration TEXT UNIQUE,
                           max_passengers INT
 );

@@ -13,7 +13,6 @@ public class Aircraft {
     private String type;
     @DBRef
     private Airline airline;
-    @DBRef
     private Manufacturer manufacturer;
     private String registration;
     private int maxPassengers;

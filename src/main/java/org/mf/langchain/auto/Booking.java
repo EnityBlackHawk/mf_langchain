@@ -10,7 +10,7 @@ import org.springframework.data.mongodb.core.mapping.DBRef;
 public class Booking {
     @Id
     private String id;
-    private String flightNumber;
+    private String flight;
     @DBRef
     private Passenger passenger;
     private String seat;

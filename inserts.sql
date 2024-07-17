@@ -13,7 +13,7 @@ VALUES ('SDU', 'Santos Dumont Airport', 'Rio de Janeiro', 'Brazil'),
        ('GRU', 'Guarulhos International Airport', 'São Paulo', 'Brazil'),
        ('CDG', 'Charles de Gaulle Airport', 'Paris', 'France');
 
-INSERT INTO aircraft (id, type, airline, manufacturer_id, registration, max_passengers)
+INSERT INTO aircraft (id, type, airline, manufacturer, registration, max_passengers)
 VALUES (1, '737-800', 1, 1, 'ACME123', 189),
        (2, 'A320neo', 2, 2, 'BUDGET456', 180),
        (3, 'E190-E2', 3, 1, 'ISKY789', 150);
