@@ -2,17 +2,18 @@ package org.mf.langchain.util
 
 import com.mongodb.DBRef
 import org.mf.langchain.DataImporter
+import org.mf.langchain.metadata.DbMetadata
 import org.springframework.data.annotation.Id
 import java.sql.ResultSet
 import java.util.*
 import java.lang.Integer
 import java.sql.Connection
 
-class QueryResult(private val con: Connection?) {
+class QueryResult(private val metadata: DbMetadata?) {
     private val columns = mutableListOf<String>()
     private val rows = mutableListOf<List<String>>()
 
-    constructor(resultSet: ResultSet, con: Connection? = null) : this(con) {
+    constructor(resultSet: ResultSet, metadata: DbMetadata? = null) : this(metadata) {
 
         for (i in 0 until resultSet.metaData.columnCount) {
             columns.add(resultSet.metaData.getColumnName(i + 1))
@@ -76,6 +77,8 @@ class QueryResult(private val con: Connection?) {
     }
 
     fun <T> asObject(clazz : Class<T>) : List<T> {
+        if(metadata == null)
+            throw Exception("Metadata required")
         val res = mutableListOf<T>()
         for (row in rows) {
             val obj = clazz.getDeclaredConstructor().newInstance()
@@ -100,22 +103,36 @@ class QueryResult(private val con: Connection?) {
                     "java.time.LocalDateTime" -> field.set(obj, java.time.LocalDateTime.parse(row[i].replace(" ", "T")))
                     else -> {
                         val isRef = field.isAnnotationPresent(org.springframework.data.mongodb.core.mapping.DBRef::class.java)
-                        val c = field.type
-                        val o = c.getDeclaredConstructor().newInstance()
+                        val _c = field.type
+                        val isList = _c.name == "java.util.List"
+                        val c = if (isList) _c.typeParameters[0].javaClass else _c
+                        val constr = c.getDeclaredConstructor()
+                        constr.isAccessible = true
+                        val o = constr.newInstance()
                         val fs = c.declaredFields
-                        val fId = fs.first { it.isAnnotationPresent(Id::class.java) }
+                        val fId = fs.firstOrNull { it.isAnnotationPresent(Id::class.java) }
+
+
                         if(isRef) {
-                            fId.isAccessible = true
+                            assert(fId != null) { "fId was null" }
+                            fId!!.isAccessible = true
                             fId.set(o, row[i])
                             field.set(obj, o)
                             continue
                         }
-                        if(con == null) throw Exception("Connection is null")
+
                         val tableName = c.simpleName.lowercase()
-                        DataImporter.runQuery("SELECT * FROM $tableName WHERE ${fId.name} = '${row[i]}'", con, QueryResult::class.java)
-                            .asObject(c).firstOrNull()?.let {
-                            field.set(obj, it)
-                        }
+
+                        val table = metadata.tables.find { it.name == tableName }
+                        if (table == null)
+                            throw Exception("Table $tableName not found")
+
+                        val pkName = table.primaryKey.name
+
+                        val query = "SELECT * FROM $tableName WHERE $pkName = '${row[i]}'"
+                        val arr = DataImporter.runQuery(query, metadata, QueryResult::class.java).asObject(c)
+                        assert(arr.size == 1) { "No rows resulted for: $query" }
+                        arr.firstOrNull()?.let { field.set(obj, it)}
                     }
                 }
             }

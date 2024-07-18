@@ -1,5 +1,6 @@
 package org.mf.langchain
 
+import org.mf.langchain.metadata.DbMetadata
 import org.mf.langchain.util.QueryResult
 import org.springframework.core.io.PathResource
 import org.springframework.core.io.support.EncodedResource
@@ -81,19 +82,36 @@ class DataImporter {
             return result
         }
 
-        fun <T> runQuery(sql : String, connection : Connection, output : Class<T>) : T {
+        fun <T> runQuery(sql : String, connection: Connection, output : Class<T>) : T {
 
                 connection.createStatement().use { statement ->
                     val rs = statement.executeQuery(sql)
                     val res = when(output) {
                         ResultSet::class.java -> rs as T
-                        QueryResult::class.java -> QueryResult(rs, connection) as T
+                        QueryResult::class.java -> QueryResult(rs) as T
                         else -> throw IllegalArgumentException("Unsupported output class")
                     }
                     statement.close()
                     return res
                 }
         }
+
+        fun <T> runQuery(sql : String, dbm: DbMetadata, output : Class<T>) : T {
+            dbm.apply {
+                connection.createStatement().use { statement ->
+                    val rs = statement.executeQuery(sql)
+                    val res = when(output) {
+                        ResultSet::class.java -> rs as T
+                        QueryResult::class.java -> QueryResult(rs, this) as T
+                        else -> throw IllegalArgumentException("Unsupported output class")
+                    }
+                    statement.close()
+                    return res
+                }
+            }
+        }
+
+
 
         fun createDatabase(connection : Connection, databaseName : String) : String {
             return runSQL("CREATE DATABASE $databaseName", connection)

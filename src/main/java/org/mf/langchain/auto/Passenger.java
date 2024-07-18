@@ -1,12 +1,11 @@
 package org.mf.langchain.auto;
 
-// Passenger.java
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Data
-@Document
+@Document(collection = "passenger")
 public class Passenger {
     @Id
     private String id;

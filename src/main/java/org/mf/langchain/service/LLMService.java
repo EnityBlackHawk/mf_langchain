@@ -323,27 +323,27 @@ public class LLMService {
     public void pushMigration() throws SQLException {
         var dbm = new DbMetadata("jdbc:postgresql://localhost:5432/airport3", "admin", "admin", null);
 
-        var qr = DataImporter.Companion.runQuery("SELECT * FROM airline", dbm.getConnection(), QueryResult.class);
+        var qr = DataImporter.Companion.runQuery("SELECT * FROM airline", dbm, QueryResult.class);
         List<Airline> airlines = qr.asObject(Airline.class);
         airlineRepository.saveAll(airlines);
 
-        var qr_passengers = DataImporter.Companion.runQuery("SELECT * FROM passenger", dbm.getConnection(), QueryResult.class);
+        var qr_passengers = DataImporter.Companion.runQuery("SELECT * FROM passenger", dbm, QueryResult.class);
         List<Passenger> passengers = qr_passengers.asObject(Passenger.class);
         passengerRepository.saveAll(passengers);
 
-        var qr_flights = DataImporter.Companion.runQuery("SELECT * FROM flight", dbm.getConnection(), QueryResult.class);
+        var qr_flights = DataImporter.Companion.runQuery("SELECT * FROM flight", dbm, QueryResult.class);
         List<Flight> flights = qr_flights.asObject(Flight.class);
         flightRepository.saveAll(flights);
 
-        var qr_aircraft = DataImporter.Companion.runQuery("SELECT * FROM aircraft", dbm.getConnection(), QueryResult.class);
+        var qr_aircraft = DataImporter.Companion.runQuery("SELECT * FROM aircraft", dbm, QueryResult.class);
         List<Aircraft> aircrafts = qr_aircraft.asObject(Aircraft.class);
         aircraftRepository.saveAll(aircrafts);
 
-        var qr_airports = DataImporter.Companion.runQuery("SELECT * FROM airport", dbm.getConnection(), QueryResult.class);
+        var qr_airports = DataImporter.Companion.runQuery("SELECT * FROM airport", dbm, QueryResult.class);
         List<Airport> airports = qr_airports.asObject(Airport.class);
         airportRepository.saveAll(airports);
 
-        var qr_bookings = DataImporter.Companion.runQuery("SELECT * FROM booking", dbm.getConnection(), QueryResult.class);
+        var qr_bookings = DataImporter.Companion.runQuery("SELECT * FROM booking", dbm, QueryResult.class);
         List<Booking> bookings = qr_bookings.asObject(Booking.class);
         bookingRepository.saveAll(bookings);
     }

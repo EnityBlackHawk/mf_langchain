@@ -1,6 +1,5 @@
 package org.mf.langchain.auto;
 
-// Flight.java
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -8,12 +7,12 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import java.time.LocalDateTime;
 
 @Data
-@Document
+@Document(collection = "flight")
 public class Flight {
     @Id
     private String number;
-    private Airport airportFrom;
-    private Airport airportTo;
+    private Airport from;
+    private Airport to;
     private LocalDateTime departureTimeScheduled;
     private LocalDateTime departureTimeActual;
     private LocalDateTime arrivalTimeScheduled;
