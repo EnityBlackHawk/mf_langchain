@@ -97,7 +97,10 @@ class QueryResult(private val metadata: DbMetadata?) {
                     "double" -> field.set(obj, row[i].toDouble())
                     "java.lang.String" -> field.set(obj, row[i])
                     "java.sql.Date" -> field.set(obj, java.sql.Date.valueOf(row[i]))
-                    "java.util.Date" -> field.set(obj, Date(java.sql.Date.valueOf(row[i]).time))
+                    "java.util.Date" -> {
+                        val date = java.text.SimpleDateFormat("yyyy-MM-dd").parse(row[i])
+                        field.set(obj, date)
+                    }
                     "java.sql.Timestamp" -> field.set(obj, java.sql.Timestamp.valueOf(row[i]))
                     "java.sql.Time" -> field.set(obj, java.sql.Time.valueOf(row[i]))
                     "java.time.LocalDateTime" -> field.set(obj, java.time.LocalDateTime.parse(row[i].replace(" ", "T")))

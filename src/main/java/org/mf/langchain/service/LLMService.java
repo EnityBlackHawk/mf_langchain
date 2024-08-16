@@ -154,7 +154,7 @@ public class LLMService {
                 .temperature(1d)
                 .build();
         var gptAssistant = AiServices.builder(ChatAssistant.class).chatLanguageModel(gpt).build();
-        var prompt = new PromptData(mdb, MigrationPreferences.PREFER_PERFORMANCE, false, Framework.SPRING_DATA, null, null);
+        var prompt = new PromptData(mdb, MigrationPreferences.PREFER_CONSISTENCY, true, Framework.SPRING_DATA, null, null);
         var text = prompt.get();
         var res = gptAssistant.chat(text);
         ConvertToJavaFile.toFile("src/main/java/org/mf/langchain/auto/", "org.mf.langchain.auto",res.content().text());
@@ -339,7 +339,8 @@ public class LLMService {
         List<Aircraft> aircrafts = qr_aircraft.asObject(Aircraft.class);
         aircraftRepository.saveAll(aircrafts);
 
-        var qr_airports = DataImporter.Companion.runQuery("SELECT * FROM airport", dbm, QueryResult.class);
+        var qr_airports = DataImporter.Companion.runQuery("SELECT * FROM airport", dbm,
+                QueryResult.class);
         List<Airport> airports = qr_airports.asObject(Airport.class);
         airportRepository.saveAll(airports);
 
