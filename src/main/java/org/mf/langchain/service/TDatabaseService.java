@@ -5,6 +5,7 @@ import org.mf.langchain.DTO.Credentials;
 import org.mf.langchain.DTO.ResponseCreateDatabaseDTO;
 import org.mf.langchain.DataImporter;
 import org.mf.langchain.metadata.DbMetadata;
+import org.mf.langchain.util.DatabaseInserter;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -57,11 +58,16 @@ public class TDatabaseService {
     }
 
     public Credentials createDatabase(String databaseName) throws SQLException {
+        boolean isNew = true;
         var result = DataImporter.Companion.createDatabase(mainConnection, databaseName);
-        if(!result.equals("OK")) throw new RuntimeException(result);
+        if(!result.equals("OK"))
+        {
+            System.out.println("Error creating database: " + result + "\n Connecting to an existing database");
+            isNew = false;
+        }
         var conn = DriverManager.getConnection(baseConnectionString + "/" + databaseName, username, password);
         connections.put(databaseName, conn);
-        return new Credentials(baseConnectionString + "/" + databaseName, username, password);
+        return new Credentials(baseConnectionString + "/" + databaseName, username, password, isNew ? Credentials.CreationMethod.CREATE_DATABASE : Credentials.CreationMethod.USE_EXISTING);
     }
 
     public ResponseCreateDatabaseDTO createDatabaseAndExecuteSQL(String databaseName, String sql) {
@@ -96,9 +102,15 @@ public class TDatabaseService {
 
     @PostConstruct
     public void createTestDatabase() throws SQLException {
-        var mdb = new DbMetadata(createDatabase("airport3"), null);
-        DataImporter.Companion.runSQLFromFile("src/main/resources/data.sql", mdb.getConnection());
-        DataImporter.Companion.runSQLFromFile("inserts.sql", mdb.getConnection());
+        var cred = createDatabase("airport3");
+        var mdb = new DbMetadata(cred, null);
+        if(cred.getCreationMethod() == Credentials.CreationMethod.CREATE_DATABASE)
+        {
+            DataImporter.Companion.runSQLFromFile("src/main/resources/data.sql", mdb.getConnection());
+            //DataImporter.Companion.runSQLFromFile("inserts.sql", mdb.getConnection());
+            DatabaseInserter inserter = new DatabaseInserter(cred);
+            inserter.insertData();
+        }
     }
 
     @PreDestroy
