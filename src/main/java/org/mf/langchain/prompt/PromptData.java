@@ -50,7 +50,7 @@ public class PromptData implements Iterator<String> {
             customCodePrompts = new java.util.ArrayList<>();
         customCodePrompts.add("Use Lombok");
         customCodePrompts.add("Optimized for "+ framework.getFramework() +" framework");
-        customPrompts.add(allowReferences ? "You can use references when necessary" : "Do not use references, only use embedded the documents");
+        customPrompts.add(allowReferences ? "You can use references ONLY if will help with performance" : "Do not use references, only use embedded the documents");
         customPrompts.add(migrationPreference.getDescription());
     }
 

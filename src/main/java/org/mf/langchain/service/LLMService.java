@@ -154,7 +154,7 @@ public class LLMService {
                 .temperature(1d)
                 .build();
         var gptAssistant = AiServices.builder(ChatAssistant.class).chatLanguageModel(gpt).build();
-        var prompt = new PromptData(mdb, MigrationPreferences.PREFER_CONSISTENCY, true, Framework.SPRING_DATA, null, null);
+        var prompt = new PromptData(mdb, MigrationPreferences.PREFER_PERFORMANCE, false, Framework.SPRING_DATA, null, null);
         var text = prompt.get();
         var res = gptAssistant.chat(text);
         ConvertToJavaFile.toFile("src/main/java/org/mf/langchain/auto/", "org.mf.langchain.auto",res.content().text());

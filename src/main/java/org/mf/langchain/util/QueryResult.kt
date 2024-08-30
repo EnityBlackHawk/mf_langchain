@@ -124,8 +124,10 @@ class QueryResult(private val metadata: DbMetadata?) {
                             continue
                         }
 
-                        val tableName = c.simpleName.lowercase()
-
+                        var tableName = c.simpleName.lowercase()
+                        if(tableName.contains("reference")) {
+                            tableName = tableName.replace("reference", "")
+                        }
                         val table = metadata.tables.find { it.name == tableName }
                         if (table == null)
                             throw Exception("Table $tableName not found")
