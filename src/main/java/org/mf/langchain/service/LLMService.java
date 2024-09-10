@@ -33,21 +33,11 @@ import java.util.*;
 public class LLMService {
 
     private final PersistenceService persistenceService;
-    private final PassengerRepository passengerRepository;
-    private final AirlineRepository airlineRepository;
-    private final FlightRepository flightRepository;
-    private final AircraftRepository aircraftRepository;
-    private final AirportRepository airportRepository;
-    private final BookingRepository bookingRepository;
 
-    public LLMService(@Autowired PersistenceService persistenceService, @Autowired PassengerRepository passengerRepository, AirlineRepository airlineRepository, FlightRepository flightRepository, AircraftRepository aircraftRepository, AirportRepository airportRepository, BookingRepository bookingRepository){
+
+    public LLMService(@Autowired PersistenceService persistenceService){
         this.persistenceService = persistenceService;
-        this.passengerRepository = passengerRepository;
-        this.airlineRepository = airlineRepository;
-        this.flightRepository = flightRepository;
-        this.aircraftRepository = aircraftRepository;
-        this.airportRepository = airportRepository;
-        this.bookingRepository = bookingRepository;
+
     }
 
     public MfEntity<?> initFlow(SpecificationDTO spec) {
@@ -320,32 +310,7 @@ public class LLMService {
         return Pair.of(data, card);
     }
 
-    public void pushMigration() throws SQLException {
-        var dbm = new DbMetadata("jdbc:postgresql://localhost:5432/airport3", "admin", "admin", null);
-
-        var qr = DataImporter.Companion.runQuery("SELECT * FROM airline", dbm, QueryResult.class);
-        List<Airline> airlines = qr.asObject(Airline.class);
-        airlineRepository.saveAll(airlines);
-
-        var qr_passengers = DataImporter.Companion.runQuery("SELECT * FROM passenger", dbm, QueryResult.class);
-        List<Passenger> passengers = qr_passengers.asObject(Passenger.class);
-        passengerRepository.saveAll(passengers);
-
-        var qr_flights = DataImporter.Companion.runQuery("SELECT * FROM flight", dbm, QueryResult.class);
-        List<Flight> flights = qr_flights.asObject(Flight.class);
-        flightRepository.saveAll(flights);
-
-        var qr_aircraft = DataImporter.Companion.runQuery("SELECT * FROM aircraft", dbm, QueryResult.class);
-        List<Aircraft> aircrafts = qr_aircraft.asObject(Aircraft.class);
-        aircraftRepository.saveAll(aircrafts);
-
-        var qr_airports = DataImporter.Companion.runQuery("SELECT * FROM airport", dbm,
-                QueryResult.class);
-        List<Airport> airports = qr_airports.asObject(Airport.class);
-        airportRepository.saveAll(airports);
-
-        var qr_bookings = DataImporter.Companion.runQuery("SELECT * FROM booking", dbm, QueryResult.class);
-        List<Booking> bookings = qr_bookings.asObject(Booking.class);
-        bookingRepository.saveAll(bookings);
+    public void pushMigration() {
+        throw new RuntimeException("Not implemented");
     }
 }
