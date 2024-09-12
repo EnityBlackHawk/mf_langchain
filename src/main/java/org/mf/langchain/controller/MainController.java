@@ -67,6 +67,14 @@ public class MainController {
         return result.aiResponse();
     }
 
+    @PostMapping("/art/rerun-last")
+    public String runRerun(HttpServletResponse response) throws SQLException {
+        var result = service.reRunBasic();
+        response.addHeader("Total-Tokens", String.valueOf(result.tokens()));
+        response.addHeader("Prompt", result.prompt());
+        return result.aiResponse();
+    }
+
     @PostMapping("/art/push")
     public String runPush() throws SQLException {
         service.pushMigration();

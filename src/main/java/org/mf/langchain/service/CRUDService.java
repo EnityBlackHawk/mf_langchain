@@ -26,4 +26,9 @@ public class CRUDService<TEntity, TPk, TRepo extends JpaRepository<TEntity, TPk>
         repository.deleteById(id);
     }
 
+    public TEntity getLast() {
+        var list = repository.findAll();
+        return list.get(list.size() - 1);
+    }
+
 }

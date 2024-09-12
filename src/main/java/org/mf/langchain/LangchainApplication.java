@@ -5,17 +5,17 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.Arrays;
 
 @SpringBootApplication
 public class LangchainApplication {
 
     public static final boolean RUN_CACHED = false;
-
+    public static boolean INSERT_TEST_DATA = false;
 
     public static void main(String[] args) throws IOException, SQLException {
         var context = SpringApplication.run(LangchainApplication.class, args);
         MockLayer.isActivated = false;
-
 
         /*
         var airportRepo = context.getBean(AirportRepository.class);

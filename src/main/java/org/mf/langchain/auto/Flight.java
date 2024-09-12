@@ -1,15 +1,14 @@
 package org.mf.langchain.auto;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
-
+import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Data
-@Document(collection = "flight")
+@NoArgsConstructor
+@AllArgsConstructor
 public class Flight {
-    @Id
     private String number;
     private Airport airportFrom;
     private Airport airportTo;
@@ -17,7 +16,7 @@ public class Flight {
     private LocalDateTime departureTimeActual;
     private LocalDateTime arrivalTimeScheduled;
     private LocalDateTime arrivalTimeActual;
-    private int gate;
+    private Integer gate;
     private Aircraft aircraft;
-    private Flight connectsTo;
+    private String connectsTo; // using flight number
 }

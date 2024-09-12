@@ -18,6 +18,7 @@ import org.mf.langchain.metadata.Column;
 import org.mf.langchain.metadata.DbMetadata;
 import org.mf.langchain.DTO.RelationCardinality;
 import org.mf.langchain.metadata.Table;
+import org.mf.langchain.model.BasicRuns;
 import org.mf.langchain.prompt.*;
 import org.mf.langchain.util.QueryResult;
 import org.mf.langchain.util.TemplatedString;
@@ -40,7 +41,9 @@ public class LLMService {
     private final AirportRepository airportRepository;
     private final BookingRepository bookingRepository;
 
-    public LLMService(@Autowired PersistenceService persistenceService, @Autowired PassengerRepository passengerRepository, AirlineRepository airlineRepository, FlightRepository flightRepository, AircraftRepository aircraftRepository, AirportRepository airportRepository, BookingRepository bookingRepository){
+    private final BasicRunsService basicRunsService;
+
+    public LLMService(@Autowired PersistenceService persistenceService, @Autowired PassengerRepository passengerRepository, AirlineRepository airlineRepository, FlightRepository flightRepository, AircraftRepository aircraftRepository, AirportRepository airportRepository, BookingRepository bookingRepository, BasicRunsService basicRunsService){
         this.persistenceService = persistenceService;
         this.passengerRepository = passengerRepository;
         this.airlineRepository = airlineRepository;
@@ -48,6 +51,7 @@ public class LLMService {
         this.aircraftRepository = aircraftRepository;
         this.airportRepository = airportRepository;
         this.bookingRepository = bookingRepository;
+        this.basicRunsService = basicRunsService;
     }
 
     public MfEntity<?> initFlow(SpecificationDTO spec) {
@@ -149,7 +153,7 @@ public class LLMService {
         var mdb = new DbMetadata(credentials.getConnectionString(), credentials.getUsername(), credentials.getPassword(), null);
         var gpt = new OpenAiChatModel.OpenAiChatModelBuilder()
                 .apiKey(System.getenv("GPT_KEY"))
-                .modelName("gpt-4o")
+                .modelName("gpt-4o-mini")
                 .maxRetries(1)
                 .temperature(1d)
                 .build();
@@ -157,8 +161,25 @@ public class LLMService {
         var prompt = new PromptData(mdb, MigrationPreferences.PREFER_PERFORMANCE, false, Framework.SPRING_DATA, null, null);
         var text = prompt.get();
         var res = gptAssistant.chat(text);
+
+        var brh = new BasicRuns(null, prompt.get(), res.content().text());
+        basicRunsService.create(brh);
+
         ConvertToJavaFile.toFile("src/main/java/org/mf/langchain/auto/", "org.mf.langchain.auto",res.content().text());
         return new LLMResponse(res.content().text(), res.tokenUsage().totalTokenCount(), prompt.get(), new Date());
+    }
+
+    public LLMResponse reRunBasic() {
+        var brh = basicRunsService.getLast();
+        var gpt = new OpenAiChatModel.OpenAiChatModelBuilder()
+                .apiKey(System.getenv("GPT_KEY"))
+                .modelName("gpt-4o-mini")
+                .maxRetries(1)
+                .temperature(1d)
+                .build();
+        var gptAssistant = AiServices.builder(ChatAssistant.class).chatLanguageModel(gpt).build();
+        var res = gptAssistant.chat(brh.getPrompt());
+        return new LLMResponse(res.content().text(), res.tokenUsage().totalTokenCount(), brh.getPrompt(), new Date());
     }
 
     public LLMResponse Generate(SpecificationDTO spec) {
