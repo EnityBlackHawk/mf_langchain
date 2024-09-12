@@ -6,6 +6,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.mf.langchain.metadata.DbMetadata;
+import org.mf.langchain.service.CompilerService;
 import org.mf.langchain.service.LLMService;
 import org.mf.langchain.service.TDatabaseService;
 import org.mf.langchain.util.QueryResult;
@@ -22,17 +23,25 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @SpringBootTest
 class LangchainApplicationTests {
 
-    private final TDatabaseService tDatabaseService;
+    private final CompilerService _compilerService;
 
-    LangchainApplicationTests(@Autowired org.mf.langchain.service.TDatabaseService tDatabaseService) {
-        this.tDatabaseService = tDatabaseService;
+    @Autowired
+    LangchainApplicationTests(CompilerService compilerService) {
+        _compilerService = compilerService;
     }
+
 
     @Test
     void writeAStory() {
         var ts = new TemplatedString("{{name}} is {{age}} years old");
         var result = ts.render(Pair.of("name", "John"), Pair.of("age", "25"));
         assertEquals("John is 25 years old", result);
+    }
+
+    @Test
+    void compileModel() throws Exception {
+        var result = _compilerService.compileAndRun("MfRuntimeClass", "public class MfRuntimeClass { private String name = \"Luan\"; public String hello() { return \"Hello \" + name; }}");
+        assertEquals("Hello Luan", result);
     }
 
 //    @Test

@@ -4,6 +4,7 @@ import org.mf.langchain.DTO.CreateDatabaseDTO;
 import org.mf.langchain.DTO.Credentials;
 import org.mf.langchain.DTO.ResponseCreateDatabaseDTO;
 import org.mf.langchain.DataImporter;
+import org.mf.langchain.LangchainApplication;
 import org.mf.langchain.metadata.DbMetadata;
 import org.mf.langchain.util.DatabaseInserter;
 import org.springframework.beans.factory.DisposableBean;
@@ -108,8 +109,12 @@ public class TDatabaseService {
         {
             DataImporter.Companion.runSQLFromFile("src/main/resources/data.sql", mdb.getConnection());
             //DataImporter.Companion.runSQLFromFile("inserts.sql", mdb.getConnection());
-            DatabaseInserter inserter = new DatabaseInserter(cred);
-            inserter.insertData();
+            if(LangchainApplication.INSERT_TEST_DATA)
+            {
+                DatabaseInserter inserter = new DatabaseInserter(cred);
+                inserter.insertData();
+            }
+
         }
     }
 
