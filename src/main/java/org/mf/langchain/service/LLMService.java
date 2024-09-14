@@ -20,6 +20,7 @@ import org.mf.langchain.DTO.RelationCardinality;
 import org.mf.langchain.metadata.Table;
 import org.mf.langchain.model.BasicRuns;
 import org.mf.langchain.prompt.*;
+import org.mf.langchain.runtimeCompiler.MfRuntimeCompiler;
 import org.mf.langchain.util.QueryResult;
 import org.mf.langchain.util.TemplatedString;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -135,7 +136,7 @@ public class LLMService {
         String result;
 
         if(MockLayer.isActivated) {
-            result = MockLayer.MOCK_GENERATE_JAVA_CODE;
+            throw new RuntimeException("Not implemented");
         }
         else {
             var prompt = PromptData3.getSecond(model.getModel(), Framework.SPRING_DATA);
@@ -151,6 +152,7 @@ public class LLMService {
 
     public LLMResponse runBasic(Credentials credentials) throws SQLException {
         var mdb = new DbMetadata(credentials.getConnectionString(), credentials.getUsername(), credentials.getPassword(), null);
+        var text = "";
         var gpt = new OpenAiChatModel.OpenAiChatModelBuilder()
                 .apiKey(System.getenv("GPT_KEY"))
                 .modelName("gpt-4o-mini")
@@ -158,15 +160,21 @@ public class LLMService {
                 .temperature(1d)
                 .build();
         var gptAssistant = AiServices.builder(ChatAssistant.class).chatLanguageModel(gpt).build();
-        var prompt = new PromptData(mdb, MigrationPreferences.PREFER_PERFORMANCE, false, Framework.SPRING_DATA, null, null);
-        var text = prompt.get();
+        if(MockLayer.isActivated) {
+            throw new RuntimeException("Not implemented");
+        }
+        else {
+            var prompt = new PromptData(mdb, MigrationPreferences.PREFER_PERFORMANCE, false, Framework.SPRING_DATA, null, null);
+            text = prompt.get();
+        }
         var res = gptAssistant.chat(text);
 
-        var brh = new BasicRuns(null, prompt.get(), res.content().text());
+        var brh = new BasicRuns(null, text, res.content().text());
         basicRunsService.create(brh);
 
         ConvertToJavaFile.toFile("src/main/java/org/mf/langchain/auto/", "org.mf.langchain.auto",res.content().text());
-        return new LLMResponse(res.content().text(), res.tokenUsage().totalTokenCount(), prompt.get(), new Date());
+
+        return new LLMResponse(res.content().text(), res.tokenUsage().totalTokenCount(), text , new Date());
     }
 
     public LLMResponse reRunBasic() {

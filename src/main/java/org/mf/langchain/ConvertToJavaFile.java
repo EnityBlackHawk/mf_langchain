@@ -2,6 +2,8 @@ package org.mf.langchain;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class ConvertToJavaFile {
@@ -181,6 +183,32 @@ public class ConvertToJavaFile {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static Map<String, String> toMap(String content) {
+        var contents = new ArrayList<String>();
+        while(true){
+            var start = content.indexOf("```java");
+            if(start == -1)
+                break;
+            var start_2 = content.substring(start + 8);
+            var end = start_2.indexOf("```");
+            contents.add(start_2.substring(0, end));
+            content = content.substring(start + 8 + end);
+        }
+
+        var map = new HashMap<String, String>();
+        for(String c : contents){
+            var classNameIndex = c.indexOf("class");
+            var isInterface = classNameIndex == -1;
+            if(isInterface) {
+                continue;
+            }
+            var className = c.substring(classNameIndex + 6, c.indexOf("{")).trim();
+            map.put(className, c);
+        }
+
+        return map;
     }
 
     public static void toFile(String path, String _package, String content) {

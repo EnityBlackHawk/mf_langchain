@@ -34,9 +34,19 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:5.0.0-alpha.9")
     implementation("io.hypersistence:hypersistence-utils-hibernate-60:3.7.6")
     implementation("org.modelmapper:modelmapper:3.2.0")
-    compileOnly ("org.projectlombok:lombok:1.18.8")
+    implementation ("org.projectlombok:lombok:1.18.8")
     annotationProcessor ("org.projectlombok:lombok:1.18.8")
 
+    implementation("com.querydsl:querydsl-apt:5.0.0")
+
+}
+
+tasks.withType<JavaCompile> {
+    options.compilerArgs.addAll(
+        listOf(
+            "--add-exports", "jdk.compiler/com.sun.tools.javac.processing=ALL-UNNAMED"
+        )
+    )
 }
 
 tasks.withType<Test> {

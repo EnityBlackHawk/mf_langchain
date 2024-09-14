@@ -2,10 +2,7 @@ package org.mf.langchain;
 
 import org.mf.langchain.enums.ProcessStepName;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public class MockLayer {
 
@@ -82,20 +79,51 @@ public class MockLayer {
             \t"connects_to": String  // flight.number of connecting flight
             }""";
 
-    public static final String MOCK_GENERATE_JAVA_CODE = "";
+    public static final Map<String, String> MOCK_GENERATE_JAVA_CODE = Map.of( "Airline", """
+            import org.springframework.data.annotation.Id;
+            public class Airline {
+                @Id
+                private String id;
+                private String name;
+            }
+            """,
+            "Manufacturer",
+            """
+             import org.springframework.data.annotation.Id;
+             public class Manufacturer {
+                @Id
+                private String id;
+                private String name;
+            }
+            """,
+            "Aircraft",
+            """
+            import org.springframework.data.mongodb.core.mapping.DBRef;
+            import lombok.Data;
+            @Data
+            public class Aircraft {
+                private String id;
+                private String type;
+                @DBRef
+                private Airline airline;
+                private Manufacturer manufacturer;
+                private String registration;
+                private int maxPassengers;
+             }
+            """);
 
 
-    public void init(ProcessStepName[] ... steps) {
-        isActivated = true;
-        var l = Arrays.stream(steps).toList();
-        if(l.contains(ProcessStepName.GENERATE_MODEL)) {
-            values.put(ProcessStepName.GENERATE_MODEL, MOCK_GENERATE_MODEL);
-        }
-        if(l.contains(ProcessStepName.GENERATE_JAVA_CODE)) {
-            values.put(ProcessStepName.GENERATE_JAVA_CODE, MOCK_GENERATE_JAVA_CODE);
-        }
-
-    }
+//    public void init(ProcessStepName[] ... steps) {
+//        isActivated = true;
+//        var l = Arrays.stream(steps).toList();
+//        if(l.contains(ProcessStepName.GENERATE_MODEL)) {
+//            values.put(ProcessStepName.GENERATE_MODEL, MOCK_GENERATE_MODEL);
+//        }
+//        if(l.contains(ProcessStepName.GENERATE_JAVA_CODE)) {
+//            values.put(ProcessStepName.GENERATE_JAVA_CODE, MOCK_GENERATE_JAVA_CODE);
+//        }
+//
+//    }
 
     public static Optional<String> getValue(ProcessStepName step) {
         return Optional.ofNullable(values.get(step));
