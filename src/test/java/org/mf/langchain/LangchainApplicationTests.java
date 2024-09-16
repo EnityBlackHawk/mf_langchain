@@ -88,7 +88,7 @@ class LangchainApplicationTests {
 
          // var cazz = CompilerUtils.CACHED_COMPILER.loadFromJava("Airline", MockLayer.MOCK_GENERATE_JAVA_CODE.get("Airline"));
 
-         var classes = MfRuntimeCompiler.compile(MockLayer.MOCK_GENERATE_JAVA_CODE);
+         var classes = MfRuntimeCompiler.compile(MockLayer.MOCK_GENERATE_JAVA_CODE, null);
 
         // Get and convert the data
         var qr = DataImporter.Companion.runQuery("SELECT * FROM aircraft", dbm, QueryResult.class);

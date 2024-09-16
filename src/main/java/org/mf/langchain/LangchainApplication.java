@@ -11,7 +11,7 @@ import java.util.Arrays;
 public class LangchainApplication {
 
     public static final boolean RUN_CACHED = false;
-    public static boolean INSERT_TEST_DATA = false;
+    public static boolean INSERT_TEST_DATA = true;
 
     public static void main(String[] args) throws IOException, SQLException {
         var context = SpringApplication.run(LangchainApplication.class, args);

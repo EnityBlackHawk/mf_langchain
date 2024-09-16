@@ -2,6 +2,8 @@ package org.mf.langchain.service;
 
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
 import dev.langchain4j.model.openai.OpenAiChatModel;
 import dev.langchain4j.model.openai.OpenAiChatModelName;
 import dev.langchain4j.service.AiServices;
@@ -20,10 +22,14 @@ import org.mf.langchain.DTO.RelationCardinality;
 import org.mf.langchain.metadata.Table;
 import org.mf.langchain.model.BasicRuns;
 import org.mf.langchain.prompt.*;
+import org.mf.langchain.runtimeCompiler.MfDefaultPreCompileAction;
+import org.mf.langchain.runtimeCompiler.MfRemoveUnsupportedAnnotationsAction;
 import org.mf.langchain.runtimeCompiler.MfRuntimeCompiler;
 import org.mf.langchain.util.QueryResult;
 import org.mf.langchain.util.TemplatedString;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 
@@ -41,6 +47,9 @@ public class LLMService {
     private final AircraftRepository aircraftRepository;
     private final AirportRepository airportRepository;
     private final BookingRepository bookingRepository;
+
+    @Value("${spring.data.mongodb.uri}")
+    private String mongoUrl;
 
     private final BasicRunsService basicRunsService;
 
@@ -150,31 +159,67 @@ public class LLMService {
 
     }
 
-    public LLMResponse runBasic(Credentials credentials) throws SQLException {
+    public LLMResponse runBasic(Credentials credentials) throws Exception {
         var mdb = new DbMetadata(credentials.getConnectionString(), credentials.getUsername(), credentials.getPassword(), null);
-        var text = "";
-        var gpt = new OpenAiChatModel.OpenAiChatModelBuilder()
-                .apiKey(System.getenv("GPT_KEY"))
-                .modelName("gpt-4o-mini")
-                .maxRetries(1)
-                .temperature(1d)
-                .build();
-        var gptAssistant = AiServices.builder(ChatAssistant.class).chatLanguageModel(gpt).build();
-        if(MockLayer.isActivated) {
-            throw new RuntimeException("Not implemented");
-        }
-        else {
+        String text = "";
+        String llmRespons;
+        int tokens = 0;
+        if(!MockLayer.isActivated)
+        {
+            var gpt = new OpenAiChatModel.OpenAiChatModelBuilder()
+                    .apiKey(System.getenv("GPT_KEY"))
+                    .modelName("gpt-4o-mini")
+                    .maxRetries(1)
+                    .temperature(1d)
+                    .build();
+            var gptAssistant = AiServices.builder(ChatAssistant.class).chatLanguageModel(gpt).build();
             var prompt = new PromptData(mdb, MigrationPreferences.PREFER_PERFORMANCE, false, Framework.SPRING_DATA, null, null);
             text = prompt.get();
+            var res = gptAssistant.chat(text);
+            var brh = new BasicRuns(null, text, res.content().text());
+            basicRunsService.create(brh);
+
+            llmRespons = res.content().text();
+            tokens = res.tokenUsage().totalTokenCount();
+
         }
-        var res = gptAssistant.chat(text);
+        else
+        {
+            llmRespons = MockLayer.MOCK_LLM_RESPOSE;
+        }
 
-        var brh = new BasicRuns(null, text, res.content().text());
-        basicRunsService.create(brh);
+        Map<String, String> classesSource = ConvertToJavaFile.toMap(llmRespons);
+        Map<String, Class<?>> classes = MfRuntimeCompiler.compile(classesSource, new MfDefaultPreCompileAction());
+        makeMigration(mdb, classes);
 
-        ConvertToJavaFile.toFile("src/main/java/org/mf/langchain/auto/", "org.mf.langchain.auto",res.content().text());
+        return new LLMResponse(llmRespons, tokens, text , new Date());
+    }
 
-        return new LLMResponse(res.content().text(), res.tokenUsage().totalTokenCount(), text , new Date());
+    public String compileAndRun(Map<String, String> classes) throws Exception {
+        var c = MfRuntimeCompiler.compile(classes, null);
+        String className = c.keySet().stream().findFirst().orElseThrow();
+        var clazz = c.get(className);
+        var instance = clazz.getDeclaredConstructor().newInstance();
+        var main = clazz.getDeclaredMethod("main");
+        return (String) main.invoke(instance);
+    }
+
+    private void makeMigration(DbMetadata dbm, Map<String, Class<?>> classes)
+    {
+        for(String className : classes.keySet())
+        {
+            QueryResult qr = DataImporter.Companion.runQuery(String.format("SELECT * FROM %s", className), dbm, QueryResult.class);
+            List<?> objects = qr.asObject(classes.get(className));
+
+            MongoClient mClient = MongoClients.create(mongoUrl);
+            MongoTemplate mTemplate = new MongoTemplate(mClient, "migrationAuto");
+
+            for(var obj : objects)
+            {
+                mTemplate.insert(obj);
+            }
+
+        }
     }
 
     public LLMResponse reRunBasic() {

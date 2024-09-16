@@ -2,6 +2,7 @@ package org.mf.langchain.runtimeCompiler;
 
 import io.hypersistence.utils.common.ClassLoaderUtils;
 
+import javax.annotation.Nullable;
 import javax.annotation.processing.Processor;
 import javax.tools.JavaCompiler;
 import javax.tools.JavaFileObject;
@@ -18,13 +19,27 @@ import org.springframework.data.mongodb.repository.support.MongoAnnotationProces
 
 public class MfRuntimeCompiler {
 
-    public static Map<String, Class<?>> compile(Map<String, String> sources) throws Exception {
+    public static Map<String, Class<?>> compile(Map<String, String> sources, @Nullable IMfPreCompileAction action) throws Exception {
 
+        System.out.println("Initializing MfRuntimeCompiler");
+
+        System.out.println("[MfRuntimeCompiler] Executing pre-compile actions");
+        if(action != null) {
+            Map<String, String> newSources = new HashMap<>();
+            for (String className : sources.keySet()) {
+                System.out.println("[MfRuntimeCompiler] Executing pre-compile action for: " + className);
+                newSources.put(className, action.action(className, sources.get(className)));
+            }
+            sources.clear();
+            sources = newSources;
+        }
+        System.out.println("[MfRuntimeCompiler] Creating MfFileManager");
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
         MfFileManager fileManager = new MfFileManager(compiler.getStandardFileManager(null, null, null));
         List<JavaFileObject> files = new ArrayList<>();
 
         for (String className : sources.keySet()) {
+            System.out.println("[MfRuntimeCompiler] Creating source for: " + className);
             JavaFileObject sourceObj = new MfSourceFromString(className, sources.get(className));
             files.add(sourceObj);
         }
@@ -35,14 +50,24 @@ public class MfRuntimeCompiler {
                 File.pathSeparator + "/home/luan/jars/spring-data-mongodb-4.3.4.jar";
         Iterable<String> options = List.of("-classpath", classPath, "--add-exports", "jdk.compiler/com.sun.tools.javac.processing=ALL-UNNAMED");
 
+        System.out.println("[MfRuntimeCompiler] Using classpath: " + classPath);
+        System.out.println("[MfRuntimeCompiler] Getting Processors:");
 
         //Class<?> cLombokProcessor = Class.forName("lombok.launch.AnnotationProcessorHider$AnnotationProcessor");
         //Processor lomProcessor = (Processor) cLombokProcessor.getDeclaredConstructor().newInstance();
         Processor mongoAnnotationProcessor = new MongoAnnotationProcessor();
         Iterable<Processor> processors = List.of(mongoAnnotationProcessor);
 
-        JavaCompiler.CompilationTask task = compiler.getTask(null, fileManager, null, options, null, files);
+        for(var x : processors)
+        {
+            System.out.println("[MfRuntimeCompiler] Using Processor: " + x.getClass().getSimpleName());
+        }
+
+        System.out.println("[MfRuntimeCompiler] Config compilation");
+        JavaCompiler.CompilationTask task = compiler.getTask(null, fileManager, null, options, sources.keySet(), files);
         task.setProcessors(processors);
+
+        System.out.println("[MfRuntimeCompiler] Compiling");
         boolean result = task.call();
         if (!result) {
             throw new RuntimeException("Compilation failed.");
@@ -51,6 +76,7 @@ public class MfRuntimeCompiler {
 
         Map<String, Class<?>> classes = new HashMap<>();
 
+        System.out.println("[MfRuntimeCompiler] Getting compiled classes");
         for(String className : sources.keySet()) {
             classes.put(className, classLoader.loadClass(className));
         }

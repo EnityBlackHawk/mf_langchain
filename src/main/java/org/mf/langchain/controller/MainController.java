@@ -7,14 +7,12 @@ import org.mf.langchain.metadata.DbMetadata;
 import org.mf.langchain.service.LLMService;
 import org.mf.langchain.util.TryCast;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 
 @RestController
@@ -59,8 +57,13 @@ public class MainController {
         return service.getRelationsCardinality(dbm);
     }
 
+    @PostMapping("/expr/compile/{className}")
+    public String compile(@PathVariable String className, @RequestBody String text) throws Exception {
+        return service.compileAndRun(Map.of(className, text));
+    }
+
     @PostMapping("/art")
-    public String runBasic(@RequestBody Credentials credentials, HttpServletResponse response) throws SQLException {
+    public String runBasic(@RequestBody Credentials credentials, HttpServletResponse response) throws Exception {
         var result = service.runBasic(credentials);
         response.addHeader("Total-Tokens", String.valueOf(result.tokens()));
         response.addHeader("Prompt", result.prompt());
